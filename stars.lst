@@ -1,0 +1,873 @@
+Microsoft (R) Macro Assembler Version 6.14.8444		    03/27/15 10:23:44
+stars.asm						     Page 1 - 1
+
+
+				; #########################################################################
+				;
+				;   stars.asm - Assembly file for EECS205 Assignment 1
+				;	Draws stars using DrawStarReg, mov, add and sub operations 
+				;
+				; #########################################################################
+
+				      .586
+				      .MODEL FLAT,STDCALL
+				      .STACK 4096
+				      option casemap :none  ; case sensitive
+
+				    include stars.inc
+			      C ; #########################################################################
+			      C ;
+			      C ;   stars.inc - Includes for EECS205 Assignment 1
+			      C ;
+			      C ;
+			      C ; #########################################################################
+			      C 
+			      C 
+			      C DrawStarReg PROTO STDCALL ; Renders a star in the 2D drawing space
+			      C                         ; Uses register passed parameters:
+			      C                         ;      esi = x-coordinate
+			      C                         ;      edi = y-coordinate
+			      C 
+			      C DrawAllStars PROTO STDCALL ; Routine which uses DrawStarReg to create all the stars
+			      C 
+			      C EXTERNDEF STDCALL WinMain : NEAR
+			      C 
+
+ 00000000			.CODE
+
+				; Routine which uses DrawStarReg to create all the stars
+ 00000000			DrawAllStars PROC 
+
+				    ;; Place your code here
+					
+					;Draw First Diagonal
+ 00000000  BE 00000000			mov esi, 0
+ 00000005  BF 00000032			mov edi, 50
+ 0000000A  E8 00000000 E		call DrawStarReg
+
+ 0000000F  83 C6 0F			add esi, 15
+ 00000012  83 C7 0A			add edi, 10	
+ 00000015  E8 00000000 E		call DrawStarReg
+
+ 0000001A  83 C6 0F			add esi, 15
+ 0000001D  83 C7 0A			add edi, 10 
+ 00000020  E8 00000000 E		call DrawStarReg
+
+ 00000025  83 C6 0F			add esi, 15
+ 00000028  83 C7 0A			add edi, 10 
+ 0000002B  E8 00000000 E		call DrawStarReg
+
+ 00000030  83 C6 0F		   	add esi, 15
+ 00000033  83 C7 0A			add edi, 10 
+ 00000036  E8 00000000 E		call DrawStarReg
+
+ 0000003B  83 C6 0F			add esi, 15
+ 0000003E  83 C7 0A			add edi, 10 
+ 00000041  E8 00000000 E		call DrawStarReg
+
+ 00000046  83 C6 0F			add esi, 15
+ 00000049  83 C7 0A			add edi, 10 
+ 0000004C  E8 00000000 E		call DrawStarReg
+
+ 00000051  83 C6 0F			add esi, 15
+ 00000054  83 C7 0A			add edi, 10 
+ 00000057  E8 00000000 E		call DrawStarReg
+
+ 0000005C  83 C6 0F			add esi, 15
+ 0000005F  83 C7 0A			add edi, 10 
+ 00000062  E8 00000000 E		call DrawStarReg
+
+ 00000067  83 C6 0F			add esi, 15
+ 0000006A  83 C7 0A			add edi, 10 
+ 0000006D  E8 00000000 E		call DrawStarReg
+
+
+ 00000072  83 C6 0F			add esi, 15
+ 00000075  83 C7 0A			add edi, 10 
+ 00000078  E8 00000000 E		call DrawStarReg
+
+ 0000007D  83 C6 0F			add esi, 15
+ 00000080  83 C7 0A			add edi, 10 
+ 00000083  E8 00000000 E		call DrawStarReg
+
+ 00000088  83 C6 0F			add esi, 15
+ 0000008B  83 C7 0A			add edi, 10 
+ 0000008E  E8 00000000 E		call DrawStarReg
+
+ 00000093  83 C6 0F			add esi, 15
+ 00000096  83 C7 0A			add edi, 10 
+ 00000099  E8 00000000 E		call DrawStarReg
+
+ 0000009E  83 C6 0F			add esi, 15
+ 000000A1  83 C7 0A			add edi, 10 
+ 000000A4  E8 00000000 E		call DrawStarReg
+
+ 000000A9  83 C6 0F		   	add esi, 15
+ 000000AC  83 C7 0A			add edi, 10 
+ 000000AF  E8 00000000 E		call DrawStarReg
+
+ 000000B4  83 C6 0F			add esi, 15
+ 000000B7  83 C7 0A			add edi, 10 
+ 000000BA  E8 00000000 E		call DrawStarReg
+
+ 000000BF  83 C6 0F			add esi, 15
+ 000000C2  83 C7 0A			add edi, 10 
+ 000000C5  E8 00000000 E		call DrawStarReg
+
+ 000000CA  83 C6 0F			add esi, 15
+ 000000CD  83 C7 0A			add edi, 10 
+ 000000D0  E8 00000000 E		call DrawStarReg
+
+ 000000D5  83 C6 0F			add esi, 15
+ 000000D8  83 C7 0A			add edi, 10 
+ 000000DB  E8 00000000 E		call DrawStarReg
+
+ 000000E0  83 C6 0F			add esi, 15
+ 000000E3  83 C7 0A			add edi, 10 
+ 000000E6  E8 00000000 E		call DrawStarReg
+
+ 000000EB  83 C6 0F			add esi, 15
+ 000000EE  83 C7 0A			add edi, 10 
+ 000000F1  E8 00000000 E		call DrawStarReg
+
+ 000000F6  83 C6 0F			add esi, 15
+ 000000F9  83 C7 0A			add edi, 10 
+ 000000FC  E8 00000000 E		call DrawStarReg
+
+ 00000101  83 C6 0F				add esi, 15
+ 00000104  83 C7 0A			add edi, 10 
+ 00000107  E8 00000000 E		call DrawStarReg
+
+ 0000010C  83 C6 0F			add esi, 15
+ 0000010F  83 C7 0A			add edi, 10 
+ 00000112  E8 00000000 E		call DrawStarReg
+
+ 00000117  83 C6 0F			add esi, 15
+ 0000011A  83 C7 0A			add edi, 10 
+ 0000011D  E8 00000000 E		call DrawStarReg
+
+ 00000122  83 C6 0F		   	add esi, 15
+ 00000125  83 C7 0A			add edi, 10 
+ 00000128  E8 00000000 E		call DrawStarReg
+
+ 0000012D  83 C6 0F			add esi, 15
+ 00000130  83 C7 0A			add edi, 10 
+ 00000133  E8 00000000 E		call DrawStarReg
+
+ 00000138  83 C6 0F			add esi, 15
+ 0000013B  83 C7 0A			add edi, 10 
+ 0000013E  E8 00000000 E		call DrawStarReg
+
+ 00000143  83 C6 0F			add esi, 15
+ 00000146  83 C7 0A			add edi, 10 
+ 00000149  E8 00000000 E		call DrawStarReg
+
+ 0000014E  83 C6 0F			add esi, 15
+ 00000151  83 C7 0A			add edi, 10 
+ 00000154  E8 00000000 E		call DrawStarReg
+
+ 00000159  83 C6 0F			add esi, 15
+ 0000015C  83 C7 0A			add edi, 10 
+ 0000015F  E8 00000000 E		call DrawStarReg
+
+ 00000164  83 C6 0F			add esi, 15
+ 00000167  83 C7 0A			add edi, 10 
+ 0000016A  E8 00000000 E		call DrawStarReg
+
+ 0000016F  83 C6 0F			add esi, 15
+ 00000172  83 C7 0A			add edi, 10 
+ 00000175  E8 00000000 E		call DrawStarReg
+
+ 0000017A  83 C6 0F				add esi, 15
+ 0000017D  83 C7 0A			add edi, 10 
+ 00000180  E8 00000000 E		call DrawStarReg
+
+ 00000185  83 C6 0F			add esi, 15
+ 00000188  83 C7 0A			add edi, 10 
+ 0000018B  E8 00000000 E		call DrawStarReg
+
+ 00000190  83 C6 0F			add esi, 15
+ 00000193  83 C7 0A			add edi, 10 
+ 00000196  E8 00000000 E		call DrawStarReg
+
+ 0000019B  83 C6 0F		   	add esi, 15
+ 0000019E  83 C7 0A			add edi, 10 
+ 000001A1  E8 00000000 E		call DrawStarReg
+
+ 000001A6  83 C6 0F			add esi, 15
+ 000001A9  83 C7 0A			add edi, 10 
+ 000001AC  E8 00000000 E		call DrawStarReg
+
+ 000001B1  83 C6 0F			add esi, 15
+ 000001B4  83 C7 0A			add edi, 10 
+ 000001B7  E8 00000000 E		call DrawStarReg
+
+ 000001BC  83 C6 0F			add esi, 15
+ 000001BF  83 C7 0A			add edi, 10 
+ 000001C2  E8 00000000 E		call DrawStarReg
+
+ 000001C7  83 C6 0F			add esi, 15
+ 000001CA  83 C7 0A			add edi, 10 
+ 000001CD  E8 00000000 E		call DrawStarReg
+
+ 000001D2  83 C6 0F			add esi, 15
+ 000001D5  83 C7 0A			add edi, 10 
+ 000001D8  E8 00000000 E		call DrawStarReg
+
+ 000001DD  83 C6 0F			add esi, 15
+ 000001E0  83 C7 0A			add edi, 10 
+ 000001E3  E8 00000000 E		call DrawStarReg
+
+ 000001E8  83 C6 0F			add esi, 15
+ 000001EB  83 C7 0A			add edi, 10 
+ 000001EE  E8 00000000 E		call DrawStarReg
+
+				;Draw Second Diagonal
+ 000001F3  BE 00000000			mov esi, 0
+ 000001F8  BF 000001E0			mov edi, 480
+ 000001FD  E8 00000000 E		call DrawStarReg
+					
+ 00000202  83 C6 0F			add esi, 15
+ 00000205  83 EF 0A			sub edi, 10 
+ 00000208  E8 00000000 E		call DrawStarReg
+					
+ 0000020D  83 C6 0F			add esi, 15
+ 00000210  83 EF 0A			sub edi, 10 
+ 00000213  E8 00000000 E		call DrawStarReg
+					
+ 00000218  83 C6 0F			add esi, 15 
+ 0000021B  83 EF 0A			sub edi, 10 
+ 0000021E  E8 00000000 E		call DrawStarReg
+					
+ 00000223  83 C6 0F			add esi, 15 
+ 00000226  83 EF 0A			sub edi, 10 
+ 00000229  E8 00000000 E		call DrawStarReg
+
+ 0000022E  83 C6 0F			add esi, 15 
+ 00000231  83 EF 0A			sub edi, 10 
+ 00000234  E8 00000000 E		call DrawStarReg
+					
+
+ 00000239  83 C6 0F			add esi, 15 
+ 0000023C  83 EF 0A			sub edi, 10 
+ 0000023F  E8 00000000 E		call DrawStarReg
+					
+
+ 00000244  83 C6 0F			add esi, 15 
+ 00000247  83 EF 0A			sub edi, 10 
+ 0000024A  E8 00000000 E		call DrawStarReg
+					
+
+ 0000024F  83 C6 0F			add esi, 15 
+ 00000252  83 EF 0A			sub edi, 10 
+ 00000255  E8 00000000 E		call DrawStarReg
+					
+
+ 0000025A  83 C6 0F			add esi, 15 
+ 0000025D  83 EF 0A			sub edi, 10 
+ 00000260  E8 00000000 E		call DrawStarReg
+					
+
+ 00000265  83 C6 0F			add esi, 15 
+ 00000268  83 EF 0A			sub edi, 10 
+ 0000026B  E8 00000000 E		call DrawStarReg
+					
+
+ 00000270  83 C6 0F			add esi, 15 
+ 00000273  83 EF 0A			sub edi, 10 
+ 00000276  E8 00000000 E		call DrawStarReg
+					
+
+ 0000027B  83 C6 0F			add esi, 15 
+ 0000027E  83 EF 0A			sub edi, 10 
+ 00000281  E8 00000000 E		call DrawStarReg
+					
+
+ 00000286  83 C6 0F			add esi, 15 
+ 00000289  83 EF 0A			sub edi, 10 
+ 0000028C  E8 00000000 E		call DrawStarReg
+					
+
+ 00000291  83 C6 0F			add esi, 15 
+ 00000294  83 EF 0A			sub edi, 10 
+ 00000297  E8 00000000 E		call DrawStarReg
+					
+
+ 0000029C  83 C6 0F			add esi, 15 
+ 0000029F  83 EF 0A			sub edi, 10 
+ 000002A2  E8 00000000 E		call DrawStarReg
+					
+
+ 000002A7  83 C6 0F			add esi, 15 
+ 000002AA  83 EF 0A			sub edi, 10 
+ 000002AD  E8 00000000 E		call DrawStarReg
+					
+
+ 000002B2  83 C6 0F			add esi, 15 
+ 000002B5  83 EF 0A			sub edi, 10 
+ 000002B8  E8 00000000 E		call DrawStarReg
+					
+
+ 000002BD  83 C6 0F			add esi, 15 
+ 000002C0  83 EF 0A			sub edi, 10 
+ 000002C3  E8 00000000 E		call DrawStarReg
+					
+
+ 000002C8  83 C6 0F			add esi, 15 
+ 000002CB  83 EF 0A			sub edi, 10 
+ 000002CE  E8 00000000 E		call DrawStarReg
+					
+
+ 000002D3  83 C6 0F			add esi, 15 
+ 000002D6  83 EF 0A			sub edi, 10 
+ 000002D9  E8 00000000 E		call DrawStarReg
+					
+
+ 000002DE  83 C6 0F			add esi, 15 
+ 000002E1  83 EF 0A			sub edi, 10 
+ 000002E4  E8 00000000 E		call DrawStarReg
+					
+
+ 000002E9  83 C6 0F			add esi, 15 
+ 000002EC  83 EF 0A			sub edi, 10 
+ 000002EF  E8 00000000 E		call DrawStarReg
+					
+
+ 000002F4  83 C6 0F			add esi, 15 
+ 000002F7  83 EF 0A			sub edi, 10 
+ 000002FA  E8 00000000 E		call DrawStarReg
+					
+
+ 000002FF  83 C6 0F			add esi, 15 
+ 00000302  83 EF 0A			sub edi, 10 
+ 00000305  E8 00000000 E		call DrawStarReg
+					
+
+ 0000030A  83 C6 0F			add esi, 15 
+ 0000030D  83 EF 0A			sub edi, 10 
+ 00000310  E8 00000000 E		call DrawStarReg
+					
+
+ 00000315  83 C6 0F			add esi, 15 
+ 00000318  83 EF 0A			sub edi, 10 
+ 0000031B  E8 00000000 E		call DrawStarReg
+					
+
+ 00000320  83 C6 0F			add esi, 15 
+ 00000323  83 EF 0A			sub edi, 10 
+ 00000326  E8 00000000 E		call DrawStarReg
+					
+
+ 0000032B  83 C6 0F			add esi, 15 
+ 0000032E  83 EF 0A			sub edi, 10 
+ 00000331  E8 00000000 E		call DrawStarReg
+					
+
+ 00000336  83 C6 0F			add esi, 15 
+ 00000339  83 EF 0A			sub edi, 10 
+ 0000033C  E8 00000000 E		call DrawStarReg
+					
+
+ 00000341  83 C6 0F			add esi, 15 
+ 00000344  83 EF 0A			sub edi, 10 
+ 00000347  E8 00000000 E		call DrawStarReg
+					
+
+ 0000034C  83 C6 0F			add esi, 15 
+ 0000034F  83 EF 0A			sub edi, 10 
+ 00000352  E8 00000000 E		call DrawStarReg
+					
+
+ 00000357  83 C6 0F			add esi, 15 
+ 0000035A  83 EF 0A			sub edi, 10 
+ 0000035D  E8 00000000 E		call DrawStarReg
+					
+
+ 00000362  83 C6 0F			add esi, 15 
+ 00000365  83 EF 0A			sub edi, 10 
+ 00000368  E8 00000000 E		call DrawStarReg
+					
+
+ 0000036D  83 C6 0F			add esi, 15 
+ 00000370  83 EF 0A			sub edi, 10 
+ 00000373  E8 00000000 E		call DrawStarReg
+					
+
+ 00000378  83 C6 0F			add esi, 15 
+ 0000037B  83 EF 0A			sub edi, 10 
+ 0000037E  E8 00000000 E		call DrawStarReg
+					
+
+ 00000383  83 C6 0F			add esi, 15 
+ 00000386  83 EF 0A			sub edi, 10 
+ 00000389  E8 00000000 E		call DrawStarReg
+					
+
+ 0000038E  83 C6 0F			add esi, 15 
+ 00000391  83 EF 0A			sub edi, 10 
+ 00000394  E8 00000000 E		call DrawStarReg
+					
+
+ 00000399  83 C6 0F			add esi, 15 
+ 0000039C  83 EF 0A			sub edi, 10 
+ 0000039F  E8 00000000 E		call DrawStarReg
+					
+
+ 000003A4  83 C6 0F			add esi, 15 
+ 000003A7  83 EF 0A			sub edi, 10 
+ 000003AA  E8 00000000 E		call DrawStarReg
+					
+
+ 000003AF  83 C6 0F			add esi, 15 
+ 000003B2  83 EF 0A			sub edi, 10 
+ 000003B5  E8 00000000 E		call DrawStarReg
+					
+
+ 000003BA  83 C6 0F			add esi, 15 
+ 000003BD  83 EF 0A			sub edi, 10 
+ 000003C0  E8 00000000 E		call DrawStarReg
+					
+
+ 000003C5  83 C6 0F			add esi, 15 
+ 000003C8  83 EF 0A			sub edi, 10 
+ 000003CB  E8 00000000 E		call DrawStarReg
+					
+
+ 000003D0  83 C6 0F			add esi, 15 
+ 000003D3  83 EF 0A			sub edi, 10 
+ 000003D6  E8 00000000 E		call DrawStarReg
+					
+
+ 000003DB  83 C6 0F			add esi, 15 
+ 000003DE  83 EF 0A			sub edi, 10 
+ 000003E1  E8 00000000 E		call DrawStarReg
+					
+
+ 000003E6  83 C6 0F			add esi, 15 
+ 000003E9  83 EF 0A			sub edi, 10 
+ 000003EC  E8 00000000 E		call DrawStarReg
+					
+
+ 000003F1  83 C6 0F			add esi, 15 
+ 000003F4  83 EF 0A			sub edi, 10 
+ 000003F7  E8 00000000 E		call DrawStarReg
+					
+
+ 000003FC  83 C6 0F			add esi, 15 
+ 000003FF  83 EF 0A			sub edi, 10 
+ 00000402  E8 00000000 E		call DrawStarReg
+					
+
+ 00000407  83 C6 0F			add esi, 15 
+ 0000040A  83 EF 0A			sub edi, 10 
+ 0000040D  E8 00000000 E		call DrawStarReg
+					
+
+ 00000412  83 C6 0F			add esi, 15 
+ 00000415  83 EF 0A			sub edi, 10 
+ 00000418  E8 00000000 E		call DrawStarReg
+					
+
+ 0000041D  83 C6 0F			add esi, 15 
+ 00000420  83 EF 0A			sub edi, 10 
+ 00000423  E8 00000000 E		call DrawStarReg
+					
+
+ 00000428  83 C6 0F			add esi, 15 
+ 0000042B  83 EF 0A			sub edi, 10 
+ 0000042E  E8 00000000 E		call DrawStarReg
+					
+
+ 00000433  83 C6 0F			add esi, 15 
+ 00000436  83 EF 0A			sub edi, 10 
+ 00000439  E8 00000000 E		call DrawStarReg
+					
+
+ 0000043E  83 C6 0F			add esi, 15 
+ 00000441  83 EF 0A			sub edi, 10 
+ 00000444  E8 00000000 E		call DrawStarReg
+					
+
+ 00000449  83 C6 0F			add esi, 15 
+ 0000044C  83 EF 0A			sub edi, 10 
+ 0000044F  E8 00000000 E		call DrawStarReg
+					
+
+ 00000454  83 C6 0F			add esi, 15 
+ 00000457  83 EF 0A			sub edi, 10 
+ 0000045A  E8 00000000 E		call DrawStarReg
+					
+
+ 0000045F  83 C6 0F			add esi, 15 
+ 00000462  83 EF 0A			sub edi, 10 
+ 00000465  E8 00000000 E		call DrawStarReg
+					
+				; Center Dots	
+ 0000046A  BE 00000143			mov esi, 323
+ 0000046F  BF 00000109			mov edi, 265
+ 00000474  E8 00000000 E		call DrawStarReg
+					
+ 00000479  BE 00000142			mov esi, 322
+ 0000047E  BF 00000109			mov edi, 265
+ 00000483  E8 00000000 E		call DrawStarReg
+				; Vertical line 1
+ 00000488  BE 00000142			mov esi, 322
+ 0000048D  BF 00000000			mov edi, 0
+ 00000492  E8 00000000 E		call DrawStarReg
+ 00000497  83 C7 0A			add edi, 10
+ 0000049A  E8 00000000 E		call DrawStarReg
+ 0000049F  83 C7 0A			add edi, 10
+ 000004A2  E8 00000000 E		call DrawStarReg
+ 000004A7  83 C7 0A			add edi, 10
+ 000004AA  E8 00000000 E		call DrawStarReg
+ 000004AF  83 C7 0A			add edi, 10
+ 000004B2  E8 00000000 E		call DrawStarReg
+ 000004B7  83 C7 0A			add edi, 10
+ 000004BA  E8 00000000 E		call DrawStarReg
+ 000004BF  83 C7 0A			add edi, 10
+ 000004C2  E8 00000000 E		call DrawStarReg
+ 000004C7  83 C7 0A			add edi, 10
+ 000004CA  E8 00000000 E		call DrawStarReg
+ 000004CF  83 C7 0A			add edi, 10
+ 000004D2  E8 00000000 E		call DrawStarReg
+ 000004D7  83 C7 0A			add edi, 10
+ 000004DA  E8 00000000 E		call DrawStarReg
+ 000004DF  83 C7 0A			add edi, 10
+ 000004E2  E8 00000000 E		call DrawStarReg
+ 000004E7  83 C7 0A			add edi, 10
+ 000004EA  E8 00000000 E		call DrawStarReg
+ 000004EF  83 C7 0A			add edi, 10
+ 000004F2  E8 00000000 E		call DrawStarReg
+ 000004F7  83 C7 0A			add edi, 10
+ 000004FA  E8 00000000 E		call DrawStarReg
+ 000004FF  83 C7 0A			add edi, 10
+ 00000502  E8 00000000 E		call DrawStarReg
+ 00000507  83 C7 0A			add edi, 10
+ 0000050A  E8 00000000 E		call DrawStarReg
+ 0000050F  83 C7 0A			add edi, 10
+ 00000512  E8 00000000 E		call DrawStarReg
+ 00000517  83 C7 0A			add edi, 10
+ 0000051A  E8 00000000 E		call DrawStarReg
+ 0000051F  83 C7 0A			add edi, 10
+ 00000522  E8 00000000 E		call DrawStarReg
+ 00000527  83 C7 0A			add edi, 10
+ 0000052A  E8 00000000 E		call DrawStarReg
+ 0000052F  83 C7 0A			add edi, 10
+ 00000532  E8 00000000 E		call DrawStarReg
+ 00000537  83 C7 0A			add edi, 10
+ 0000053A  E8 00000000 E		call DrawStarReg
+ 0000053F  83 C7 0A			add edi, 10
+ 00000542  E8 00000000 E		call DrawStarReg
+ 00000547  83 C7 0A			add edi, 10
+ 0000054A  E8 00000000 E		call DrawStarReg
+ 0000054F  83 C7 0A			add edi, 10
+ 00000552  E8 00000000 E		call DrawStarReg
+ 00000557  83 C7 0A			add edi, 10
+ 0000055A  E8 00000000 E		call DrawStarReg
+ 0000055F  83 C7 0A			add edi, 10
+ 00000562  E8 00000000 E		call DrawStarReg
+ 00000567  83 C7 0A			add edi, 10
+ 0000056A  E8 00000000 E		call DrawStarReg
+ 0000056F  83 C7 0A			add edi, 10
+ 00000572  E8 00000000 E		call DrawStarReg
+ 00000577  83 C7 0A			add edi, 10
+ 0000057A  E8 00000000 E		call DrawStarReg
+ 0000057F  83 C7 0A			add edi, 10
+ 00000582  E8 00000000 E		call DrawStarReg
+ 00000587  83 C7 0A			add edi, 10
+ 0000058A  E8 00000000 E		call DrawStarReg
+ 0000058F  83 C7 0A			add edi, 10
+ 00000592  E8 00000000 E		call DrawStarReg
+ 00000597  83 C7 0A			add edi, 10
+ 0000059A  E8 00000000 E		call DrawStarReg
+ 0000059F  83 C7 0A			add edi, 10
+ 000005A2  E8 00000000 E		call DrawStarReg
+ 000005A7  83 C7 0A			add edi, 10
+ 000005AA  E8 00000000 E		call DrawStarReg
+ 000005AF  83 C7 0A			add edi, 10
+ 000005B2  E8 00000000 E		call DrawStarReg
+ 000005B7  83 C7 0A			add edi, 10
+ 000005BA  E8 00000000 E		call DrawStarReg
+ 000005BF  83 C7 0A			add edi, 10
+ 000005C2  E8 00000000 E		call DrawStarReg
+ 000005C7  83 C7 0A			add edi, 10
+ 000005CA  E8 00000000 E		call DrawStarReg
+ 000005CF  83 C7 0A			add edi, 10
+ 000005D2  E8 00000000 E		call DrawStarReg
+ 000005D7  83 C7 0A			add edi, 10
+ 000005DA  E8 00000000 E		call DrawStarReg
+ 000005DF  83 C7 0A			add edi, 10
+ 000005E2  E8 00000000 E		call DrawStarReg
+ 000005E7  83 C7 0A			add edi, 10
+ 000005EA  E8 00000000 E		call DrawStarReg
+ 000005EF  83 C7 0A			add edi, 10
+ 000005F2  E8 00000000 E		call DrawStarReg
+ 000005F7  83 C7 0A			add edi, 10
+ 000005FA  E8 00000000 E		call DrawStarReg
+ 000005FF  83 C7 0A			add edi, 10
+ 00000602  E8 00000000 E		call DrawStarReg
+ 00000607  83 C7 0A			add edi, 10
+ 0000060A  E8 00000000 E		call DrawStarReg
+ 0000060F  83 C7 0A			add edi, 10
+ 00000612  E8 00000000 E		call DrawStarReg
+ 00000617  83 C7 0A			add edi, 10
+ 0000061A  E8 00000000 E		call DrawStarReg
+ 0000061F  83 C7 0A			add edi, 10
+ 00000622  E8 00000000 E		call DrawStarReg
+ 00000627  83 C7 0A			add edi, 10
+ 0000062A  E8 00000000 E		call DrawStarReg
+ 0000062F  83 C7 0A			add edi, 10
+ 00000632  E8 00000000 E		call DrawStarReg
+ 00000637  83 C7 0A			add edi, 10
+ 0000063A  E8 00000000 E		call DrawStarReg
+						
+				; Vertical Line 2 
+ 0000063F  BE 00000143			mov esi, 323
+ 00000644  BF 00000000			mov edi, 0
+ 00000649  E8 00000000 E		call DrawStarReg
+ 0000064E  83 C7 0A			add edi, 10
+ 00000651  E8 00000000 E		call DrawStarReg
+ 00000656  83 C7 0A			add edi, 10
+ 00000659  E8 00000000 E		call DrawStarReg
+ 0000065E  83 C7 0A			add edi, 10
+ 00000661  E8 00000000 E		call DrawStarReg
+ 00000666  83 C7 0A			add edi, 10
+ 00000669  E8 00000000 E		call DrawStarReg
+ 0000066E  83 C7 0A			add edi, 10
+ 00000671  E8 00000000 E		call DrawStarReg
+ 00000676  83 C7 0A			add edi, 10
+ 00000679  E8 00000000 E		call DrawStarReg
+ 0000067E  83 C7 0A			add edi, 10
+ 00000681  E8 00000000 E		call DrawStarReg
+ 00000686  83 C7 0A			add edi, 10
+ 00000689  E8 00000000 E		call DrawStarReg
+ 0000068E  83 C7 0A			add edi, 10
+ 00000691  E8 00000000 E		call DrawStarReg
+ 00000696  83 C7 0A			add edi, 10
+ 00000699  E8 00000000 E		call DrawStarReg
+ 0000069E  83 C7 0A			add edi, 10
+ 000006A1  E8 00000000 E		call DrawStarReg
+ 000006A6  83 C7 0A			add edi, 10
+ 000006A9  E8 00000000 E		call DrawStarReg
+ 000006AE  83 C7 0A			add edi, 10
+ 000006B1  E8 00000000 E		call DrawStarReg
+ 000006B6  83 C7 0A			add edi, 10
+ 000006B9  E8 00000000 E		call DrawStarReg
+ 000006BE  83 C7 0A			add edi, 10
+ 000006C1  E8 00000000 E		call DrawStarReg
+ 000006C6  83 C7 0A			add edi, 10
+ 000006C9  E8 00000000 E		call DrawStarReg
+ 000006CE  83 C7 0A			add edi, 10
+ 000006D1  E8 00000000 E		call DrawStarReg
+ 000006D6  83 C7 0A			add edi, 10
+ 000006D9  E8 00000000 E		call DrawStarReg
+ 000006DE  83 C7 0A			add edi, 10
+ 000006E1  E8 00000000 E		call DrawStarReg
+ 000006E6  83 C7 0A			add edi, 10
+ 000006E9  E8 00000000 E		call DrawStarReg
+ 000006EE  83 C7 0A			add edi, 10
+ 000006F1  E8 00000000 E		call DrawStarReg
+ 000006F6  83 C7 0A			add edi, 10
+ 000006F9  E8 00000000 E		call DrawStarReg
+ 000006FE  83 C7 0A			add edi, 10
+ 00000701  E8 00000000 E		call DrawStarReg
+ 00000706  83 C7 0A			add edi, 10
+ 00000709  E8 00000000 E		call DrawStarReg
+ 0000070E  83 C7 0A			add edi, 10
+ 00000711  E8 00000000 E		call DrawStarReg
+ 00000716  83 C7 0A			add edi, 10
+ 00000719  E8 00000000 E		call DrawStarReg
+ 0000071E  83 C7 0A			add edi, 10
+ 00000721  E8 00000000 E		call DrawStarReg
+ 00000726  83 C7 0A			add edi, 10
+ 00000729  E8 00000000 E		call DrawStarReg
+ 0000072E  83 C7 0A			add edi, 10
+ 00000731  E8 00000000 E		call DrawStarReg
+ 00000736  83 C7 0A			add edi, 10
+ 00000739  E8 00000000 E		call DrawStarReg
+ 0000073E  83 C7 0A			add edi, 10
+ 00000741  E8 00000000 E		call DrawStarReg
+ 00000746  83 C7 0A			add edi, 10
+ 00000749  E8 00000000 E		call DrawStarReg
+ 0000074E  83 C7 0A			add edi, 10
+ 00000751  E8 00000000 E		call DrawStarReg
+ 00000756  83 C7 0A			add edi, 10
+ 00000759  E8 00000000 E		call DrawStarReg
+ 0000075E  83 C7 0A			add edi, 10
+ 00000761  E8 00000000 E		call DrawStarReg
+ 00000766  83 C7 0A			add edi, 10
+ 00000769  E8 00000000 E		call DrawStarReg
+ 0000076E  83 C7 0A			add edi, 10
+ 00000771  E8 00000000 E		call DrawStarReg
+ 00000776  83 C7 0A			add edi, 10
+ 00000779  E8 00000000 E		call DrawStarReg
+ 0000077E  83 C7 0A			add edi, 10
+ 00000781  E8 00000000 E		call DrawStarReg
+ 00000786  83 C7 0A			add edi, 10
+ 00000789  E8 00000000 E		call DrawStarReg
+ 0000078E  83 C7 0A			add edi, 10
+ 00000791  E8 00000000 E		call DrawStarReg
+ 00000796  83 C7 0A			add edi, 10
+ 00000799  E8 00000000 E		call DrawStarReg
+ 0000079E  83 C7 0A			add edi, 10
+ 000007A1  E8 00000000 E		call DrawStarReg
+ 000007A6  83 C7 0A			add edi, 10
+ 000007A9  E8 00000000 E		call DrawStarReg
+ 000007AE  83 C7 0A			add edi, 10
+ 000007B1  E8 00000000 E		call DrawStarReg
+ 000007B6  83 C7 0A			add edi, 10
+ 000007B9  E8 00000000 E		call DrawStarReg
+ 000007BE  83 C7 0A			add edi, 10
+ 000007C1  E8 00000000 E		call DrawStarReg
+ 000007C6  83 C7 0A			add edi, 10
+ 000007C9  E8 00000000 E		call DrawStarReg
+ 000007CE  83 C7 0A			add edi, 10
+ 000007D1  E8 00000000 E		call DrawStarReg
+ 000007D6  83 C7 0A			add edi, 10
+ 000007D9  E8 00000000 E		call DrawStarReg
+ 000007DE  83 C7 0A			add edi, 10
+ 000007E1  E8 00000000 E		call DrawStarReg
+ 000007E6  83 C7 0A			add edi, 10
+ 000007E9  E8 00000000 E		call DrawStarReg
+ 000007EE  83 C7 0A			add edi, 10
+ 000007F1  E8 00000000 E		call DrawStarReg
+					
+				; Horizontal Line
+ 000007F6  BE 00000000			mov esi,0
+ 000007FB  BF 00000109			mov edi, 265
+ 00000800  E8 00000000 E		call DrawStarReg
+					
+ 00000805  83 C6 0F			add esi, 15
+ 00000808  E8 00000000 E		call DrawStarReg
+					
+ 0000080D  83 C6 0F			add esi, 15
+ 00000810  E8 00000000 E		call DrawStarReg
+ 00000815  83 C6 0F			add esi, 15
+ 00000818  E8 00000000 E		call DrawStarReg
+ 0000081D  83 C6 0F			add esi, 15
+ 00000820  E8 00000000 E		call DrawStarReg
+ 00000825  83 C6 0F			add esi, 15
+ 00000828  E8 00000000 E		call DrawStarReg
+ 0000082D  83 C6 0F			add esi, 15
+ 00000830  E8 00000000 E		call DrawStarReg
+ 00000835  83 C6 0F			add esi, 15
+ 00000838  E8 00000000 E		call DrawStarReg
+ 0000083D  83 C6 0F			add esi, 15
+ 00000840  E8 00000000 E		call DrawStarReg
+ 00000845  83 C6 0F			add esi, 15
+ 00000848  E8 00000000 E		call DrawStarReg
+ 0000084D  83 C6 0F			add esi, 15
+ 00000850  E8 00000000 E		call DrawStarReg
+ 00000855  83 C6 0F			add esi, 15
+ 00000858  E8 00000000 E		call DrawStarReg
+ 0000085D  83 C6 0F			add esi, 15
+ 00000860  E8 00000000 E		call DrawStarReg
+ 00000865  83 C6 0F			add esi, 15
+ 00000868  E8 00000000 E		call DrawStarReg
+ 0000086D  83 C6 0F			add esi, 15
+ 00000870  E8 00000000 E		call DrawStarReg
+ 00000875  83 C6 0F			add esi, 15
+ 00000878  E8 00000000 E		call DrawStarReg
+ 0000087D  83 C6 0F			add esi, 15
+ 00000880  E8 00000000 E		call DrawStarReg
+ 00000885  83 C6 0F			add esi, 15
+ 00000888  E8 00000000 E		call DrawStarReg
+ 0000088D  83 C6 0F			add esi, 15
+ 00000890  E8 00000000 E		call DrawStarReg
+ 00000895  83 C6 0F			add esi, 15
+ 00000898  E8 00000000 E		call DrawStarReg
+ 0000089D  83 C6 0F			add esi, 15
+ 000008A0  E8 00000000 E		call DrawStarReg
+ 000008A5  83 C6 0F			add esi, 15
+ 000008A8  E8 00000000 E		call DrawStarReg
+ 000008AD  83 C6 0F			add esi, 15
+ 000008B0  E8 00000000 E		call DrawStarReg
+ 000008B5  83 C6 0F			add esi, 15
+ 000008B8  E8 00000000 E		call DrawStarReg
+ 000008BD  83 C6 0F			add esi, 15
+ 000008C0  E8 00000000 E		call DrawStarReg
+ 000008C5  83 C6 0F			add esi, 15
+ 000008C8  E8 00000000 E		call DrawStarReg
+ 000008CD  83 C6 0F			add esi, 15
+ 000008D0  E8 00000000 E		call DrawStarReg
+ 000008D5  83 C6 0F			add esi, 15
+ 000008D8  E8 00000000 E		call DrawStarReg
+ 000008DD  83 C6 0F			add esi, 15
+ 000008E0  E8 00000000 E		call DrawStarReg
+ 000008E5  83 C6 0F			add esi, 15
+ 000008E8  E8 00000000 E		call DrawStarReg
+ 000008ED  83 C6 0F			add esi, 15
+ 000008F0  E8 00000000 E		call DrawStarReg
+ 000008F5  83 C6 0F			add esi, 15
+ 000008F8  E8 00000000 E		call DrawStarReg
+ 000008FD  83 C6 0F			add esi, 15
+ 00000900  E8 00000000 E		call DrawStarReg
+ 00000905  83 C6 0F			add esi, 15
+ 00000908  E8 00000000 E		call DrawStarReg
+ 0000090D  83 C6 0F			add esi, 15
+ 00000910  E8 00000000 E		call DrawStarReg
+ 00000915  83 C6 0F			add esi, 15
+ 00000918  E8 00000000 E		call DrawStarReg
+ 0000091D  83 C6 0F			add esi, 15
+ 00000920  E8 00000000 E		call DrawStarReg
+ 00000925  83 C6 0F			add esi, 15
+ 00000928  E8 00000000 E		call DrawStarReg
+ 0000092D  83 C6 0F			add esi, 15
+ 00000930  E8 00000000 E		call DrawStarReg
+ 00000935  83 C6 0F			add esi, 15
+ 00000938  E8 00000000 E		call DrawStarReg
+ 0000093D  83 C6 0F			add esi, 15
+ 00000940  E8 00000000 E		call DrawStarReg
+ 00000945  83 C6 0F			add esi, 15
+ 00000948  E8 00000000 E		call DrawStarReg
+ 0000094D  83 C6 0F			add esi, 15
+ 00000950  E8 00000000 E		call DrawStarReg
+ 00000955  83 C6 0F			add esi, 15
+ 00000958  E8 00000000 E		call DrawStarReg
+
+ 0000095D  C3			ret             ;; Don't delete this line
+				    
+ 0000095E			DrawAllStars ENDP
+
+				END
+Microsoft (R) Macro Assembler Version 6.14.8444		    03/27/15 10:23:44
+stars.asm						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000000 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000095E Para	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+DrawAllStars . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000095E Public STDCALL
+DrawStarReg  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000003h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+WinMain  . . . . . . . . . . . .	L Near	 00000000 FLAT	External STDCALL
+
+	   0 Warnings
+	   0 Errors

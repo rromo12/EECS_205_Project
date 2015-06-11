@@ -1,0 +1,3193 @@
+Microsoft (R) Macro Assembler Version 6.14.8444		    03/27/15 10:23:45
+render.asm						     Page 1 - 1
+
+
+				; #########################################################################
+				;
+				;   render.asm - Assembly file for EECS205 Assignment 4/5
+				;
+				;
+				; #########################################################################
+
+				      .586
+				      .MODEL FLAT,STDCALL
+				      .STACK 4096
+				      option casemap :none  ; case sensitive
+
+				    include stars.inc		
+			      C ; #########################################################################
+			      C ;
+			      C ;   stars.inc - Includes for EECS205 Assignment 1
+			      C ;
+			      C ;
+			      C ; #########################################################################
+			      C 
+			      C 
+			      C DrawStarReg PROTO STDCALL ; Renders a star in the 2D drawing space
+			      C                         ; Uses register passed parameters:
+			      C                         ;      esi = x-coordinate
+			      C                         ;      edi = y-coordinate
+			      C 
+			      C DrawAllStars PROTO STDCALL ; Routine which uses DrawStarReg to create all the stars
+			      C 
+			      C EXTERNDEF STDCALL WinMain : NEAR
+			      C 
+				    include blit.inc
+			      C ; #########################################################################
+			      C ;
+			      C ;   blit.inc - Includes for EECS205 Assignment 2
+			      C ;
+			      C ;
+			      C ; #########################################################################
+			      C 
+			      C 
+ 00000010		      C _EECS205BITMAP STRUCT
+ 00000000  00000000	      C  dwWidth      DWORD  ?
+ 00000004  00000000	      C  dwHeight     DWORD  ?
+ 00000008  00		      C  bTransparent BYTE   ?
+ 00000009  00000003 [	      C               BYTE   3 DUP(?)
+	    00
+	   ]
+ 0000000C  00000000	      C  lpBytes      DWORD  ?
+			      C _EECS205BITMAP ENDS
+			      C 
+			      C EECS205BITMAP TYPEDEF _EECS205BITMAP
+			      C 
+			      C EXTERNDEF StarBitmap:EECS205BITMAP
+			      C EXTERNDEF dwPitch:DWORD
+			      C EXTERNDEF lpDisplayBits:DWORD
+			      C 
+			      C 
+			      C BlitReg PROTO STDCALL   ; Renders a bitmap to the 2D drawing space
+			      C                         ; Uses register passed parameters:
+			      C                         ;      esi = x-coordinate (of image center)
+			      C                         ;      edi = y-coordinate (of image center)
+			      C 			;      edx = pointer to the bitmap to draw
+			      C 
+			      C 
+			      C 
+				    include rotate.inc	
+			      C ; #########################################################################
+			      C ;
+			      C ;   rotate.inc - Includes for EECS205 Assignment 3
+			      C ;
+			      C ;
+			      C ; #########################################################################
+			      C 
+			      C include blit.inc
+			      C ; #########################################################################
+			      C ;
+			      C ;   blit.inc - Includes for EECS205 Assignment 2
+			      C ;
+			      C ;
+			      C ; #########################################################################
+			      C 
+			      C 
+			      C _EECS205BITMAP STRUCT
+			      C  dwWidth      DWORD  ?
+			      C  dwHeight     DWORD  ?
+			      C  bTransparent BYTE   ?
+			      C               BYTE   3 DUP(?)
+			      C  lpBytes      DWORD  ?
+			      C _EECS205BITMAP ENDS
+			      C 
+			      C EECS205BITMAP TYPEDEF _EECS205BITMAP
+			      C 
+			      C EXTERNDEF StarBitmap:EECS205BITMAP
+			      C EXTERNDEF dwPitch:DWORD
+			      C EXTERNDEF lpDisplayBits:DWORD
+			      C 
+			      C 
+			      C BlitReg PROTO STDCALL   ; Renders a bitmap to the 2D drawing space
+			      C                         ; Uses register passed parameters:
+			      C                         ;      esi = x-coordinate (of image center)
+			      C                         ;      edi = y-coordinate (of image center)
+			      C 			;      edx = pointer to the bitmap to draw
+			      C 
+			      C 
+			      C 
+			      C 
+			      C BasicBlit PROTO STDCALL lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD
+			      C 
+			      C RotateBlit PROTO STDCALL lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:DWORD
+			      C 
+			      C 
+			      C 
+				    include game.inc
+			      C ; #########################################################################
+			      C ;
+			      C ;   game.inc - Includes for EECS205 Assignment 4/5
+			      C ;
+			      C ;
+			      C ; #########################################################################
+			      C 
+			      C ;; These are library routines that you will call (but do NOT have to implement)
+			      C BeginDraw PROTO
+			      C EndDraw PROTO
+			      C 
+			      C ;; You should not need to modify these prototypes (actually, it would probably be bad)
+			      C GameInit PROTO
+			      C GameMain PROTO mouseStatus:DWORD, keyDown:DWORD, keyUp:DWORD
+			      C 
+			      C ;; Useful Library Routines
+			      C DrawString PROTO x:DWORD, y:DWORD, string:PTR BYTE 
+			      C DrawInt PROTO x:DWORD, y:DWORD, value:DWORD
+			      C 
+			      C ;; Feel free to modify the following
+			      C GameRender PROTO 
+			      C GameLogic PROTO CurrentKey:DWORD ;;CurrentDirection:DWORD;;xinc:DWORD, yinc:DWORD
+			      C Collision PROTO Sprite1:DWORD, Sprite2:DWORD 
+ 00000020		      C SPRITE STRUCT
+ 00000000  00000000	      C  LocX		  DWORD  ?
+ 00000004  00000000	      C  LocY		  DWORD  ?
+ 00000008  00000000	      C  Visible      DWORD  ?
+ 0000000C  00000000	      C  BitmapPTR    DWORD  ?	
+ 00000010  00000000	      C  BMType       DWORD  ?
+ 00000014  00000000	      C  Health	      DWORD  ?
+ 00000018  00000000	      C  Other	      DWORD  ?
+ 0000001C  00000000	      C  Radius		  DWORD  ?
+			      C SPRITE ENDS
+			      C 
+			      C EXTERNDEF Sprites : DWORD
+			      C EXTERNDEF expl: DWORD
+			      C EXTERNDEF NumSprites: DWORD
+			      C 
+			      C 
+					DrawAllSprites PROTO  STDCALL
+ 00000000			.DATA 
+
+
+
+
+
+ 00000000 00000029		Invader EECS205BITMAP <41, 30, 0,, offset Invader + sizeof Invader>
+	   0000001E 00
+	   00000003 [
+	    00
+	   ] 00000010 R
+ 00000010  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,000h,000h,000h,05ch,05ch,05ch,000h,000h,000h,000h,000h
+	   00 00 00 5C 5C
+	   5C 00 00 00 00
+	   00
+ 00000020  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,05ch,05ch
+	   00 00 00 00 00
+	   00 00 00 00 5C
+	   5C
+ 00000030  5C 00 00 00 00		BYTE 05ch,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+	   00 00 00 00 00
+	   00 00 00 00 00
+	   00
+ 00000040  00 5C 5C 5C 00		BYTE 000h,05ch,05ch,05ch,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+	   00 00 00 00 00
+	   00 00 00 00 00
+	   00
+ 00000050  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,000h,000h,05ch,05ch,05ch,000h,000h,000h,000h,000h,000h
+	   00 00 5C 5C 5C
+	   00 00 00 00 00
+	   00
+ 00000060  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,05ch,05ch,05ch,000h,000h,000h
+	   00 00 00 00 00
+	   5C 5C 5C 00 00
+	   00
+ 00000070  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+	   00 00 00 00 00
+	   00 00 00 00 00
+	   00
+ 00000080  5C 5C 5C 00 00		BYTE 05ch,05ch,05ch,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+	   00 00 00 00 00
+	   00 00 00 00 00
+	   00
+ 00000090  00 00 00 5C 5C		BYTE 000h,000h,000h,05ch,05ch,05ch,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+	   5C 00 00 00 00
+	   00 00 00 00 00
+	   00
+ 000000A0  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,000h,000h,000h,000h,05ch,05ch,05ch,000h,000h,000h,000h
+	   00 00 00 00 5C
+	   5C 5C 00 00 00
+	   00
+ 000000B0  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,05ch
+	   00 00 00 00 00
+	   00 00 00 00 00
+	   5C
+ 000000C0  5C 5C 5C 00 00		BYTE 05ch,05ch,05ch,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,05ch,05ch
+	   00 00 00 00 00
+	   00 00 00 00 5C
+	   5C
+ 000000D0  5C 5C 00 00 00		BYTE 05ch,05ch,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+	   00 00 00 00 00
+	   00 00 00 00 00
+	   00
+ 000000E0  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,000h,000h,000h,05ch,05ch,05ch,05ch,000h,000h,000h,000h
+	   00 00 00 5C 5C
+	   5C 5C 00 00 00
+	   00
+ 000000F0  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,000h,000h,05ch,05ch,05ch,05ch,000h,000h,000h,000h,000h
+	   00 00 5C 5C 5C
+	   5C 00 00 00 00
+	   00
+ 00000100  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+	   00 00 00 00 00
+	   00 00 00 00 00
+	   00
+ 00000110  00 5C 5C 5C 5C		BYTE 000h,05ch,05ch,05ch,05ch,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+	   00 00 00 00 00
+	   00 00 00 00 00
+	   00
+ 00000120  5C 5C 5C 5C 00		BYTE 05ch,05ch,05ch,05ch,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+	   00 00 00 00 00
+	   00 00 00 00 00
+	   00
+ 00000130  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,05ch,05ch,05ch,05ch,000h,000h
+	   00 00 00 00 00
+	   5C 5C 5C 5C 00
+	   00
+ 00000140  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,000h,000h,000h,000h,05ch,05ch,05ch,05ch,000h,000h,000h
+	   00 00 00 00 5C
+	   5C 5C 5C 00 00
+	   00
+ 00000150  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+	   00 00 00 00 00
+	   00 00 00 00 00
+	   00
+ 00000160  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch
+	   5C 5C 5C 5C 5C
+	   5C 5C 5C 5C 5C
+	   5C
+ 00000170  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,000h,000h,000h,000h,000h,000h
+	   5C 5C 5C 5C 5C
+	   00 00 00 00 00
+	   00
+ 00000180  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,000h,000h,000h,000h,05ch,05ch,05ch,05ch,05ch,05ch,05ch
+	   00 00 00 00 5C
+	   5C 5C 5C 5C 5C
+	   5C
+ 00000190  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch
+	   5C 5C 5C 5C 5C
+	   5C 5C 5C 5C 5C
+	   5C
+ 000001A0  5C 5C 5C 00 00		BYTE 05ch,05ch,05ch,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+	   00 00 00 00 00
+	   00 00 00 00 00
+	   00
+ 000001B0  00 00 5C 5C 5C		BYTE 000h,000h,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch
+	   5C 5C 5C 5C 5C
+	   5C 5C 5C 5C 5C
+	   5C
+ 000001C0  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,000h,000h,000h,000h
+	   5C 5C 5C 5C 5C
+	   5C 5C 00 00 00
+	   00
+ 000001D0  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,000h,000h,05ch,05ch,05ch,05ch,05ch,05ch,05ch,000h,000h
+	   00 00 5C 5C 5C
+	   5C 5C 5C 5C 00
+	   00
+ 000001E0  00 00 5C 5C 5C		BYTE 000h,000h,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,000h,000h,000h
+	   5C 5C 5C 5C 5C
+	   5C 5C 5C 00 00
+	   00
+ 000001F0  00 5C 5C 5C 5C		BYTE 000h,05ch,05ch,05ch,05ch,05ch,05ch,05ch,000h,000h,000h,000h,000h,000h,000h,000h
+	   5C 5C 5C 00 00
+	   00 00 00 00 00
+	   00
+ 00000200  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,000h,000h,000h,000h,05ch,05ch,05ch,05ch,05ch
+	   5C 5C 00 00 00
+	   00 5C 5C 5C 5C
+	   5C
+ 00000210  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,000h,000h,000h,000h,05ch,05ch,05ch,05ch,05ch,05ch
+	   5C 00 00 00 00
+	   5C 5C 5C 5C 5C
+	   5C
+ 00000220  5C 00 00 00 00		BYTE 05ch,000h,000h,000h,000h,000h,000h,000h,000h,05ch,05ch,05ch,05ch,05ch,05ch,05ch
+	   00 00 00 00 5C
+	   5C 5C 5C 5C 5C
+	   5C
+ 00000230  00 00 00 00 5C		BYTE 000h,000h,000h,000h,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,000h
+	   5C 5C 5C 5C 5C
+	   5C 5C 5C 5C 5C
+	   00
+ 00000240  00 00 00 5C 5C		BYTE 000h,000h,000h,05ch,05ch,05ch,05ch,05ch,05ch,05ch,000h,000h,000h,000h,000h,000h
+	   5C 5C 5C 5C 5C
+	   00 00 00 00 00
+	   00
+ 00000250  00 00 5C 5C 5C		BYTE 000h,000h,05ch,05ch,05ch,05ch,05ch,05ch,05ch,000h,000h,000h,000h,05ch,05ch,05ch
+	   5C 5C 5C 5C 00
+	   00 00 00 5C 5C
+	   5C
+ 00000260  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,000h,000h,000h,000h,05ch,05ch,05ch,05ch
+	   5C 5C 5C 00 00
+	   00 00 5C 5C 5C
+	   5C
+ 00000270  5C 5C 5C 00 00		BYTE 05ch,05ch,05ch,000h,000h,000h,000h,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch
+	   00 00 5C 5C 5C
+	   5C 5C 5C 5C 5C
+	   5C
+ 00000280  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch
+	   5C 5C 5C 5C 5C
+	   5C 5C 5C 5C 5C
+	   5C
+ 00000290  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch
+	   5C 5C 5C 5C 5C
+	   5C 5C 5C 5C 5C
+	   5C
+ 000002A0  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch
+	   5C 5C 5C 5C 5C
+	   5C 5C 5C 5C 5C
+	   5C
+ 000002B0  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch
+	   5C 5C 5C 5C 5C
+	   5C 5C 5C 5C 5C
+	   5C
+ 000002C0  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch
+	   5C 5C 5C 5C 5C
+	   5C 5C 5C 5C 5C
+	   5C
+ 000002D0  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch
+	   5C 5C 5C 5C 5C
+	   5C 5C 5C 5C 5C
+	   5C
+ 000002E0  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch
+	   5C 5C 5C 5C 5C
+	   5C 5C 5C 5C 5C
+	   5C
+ 000002F0  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch
+	   5C 5C 5C 5C 5C
+	   5C 5C 5C 5C 5C
+	   5C
+ 00000300  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch
+	   5C 5C 5C 5C 5C
+	   5C 5C 5C 5C 5C
+	   5C
+ 00000310  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,000h
+	   5C 5C 5C 5C 5C
+	   5C 5C 5C 5C 5C
+	   00
+ 00000320  00 00 00 5C 5C		BYTE 000h,000h,000h,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch
+	   5C 5C 5C 5C 5C
+	   5C 5C 5C 5C 5C
+	   5C
+ 00000330  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,000h,000h,000h,000h
+	   5C 5C 5C 5C 5C
+	   5C 5C 00 00 00
+	   00
+ 00000340  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,000h,000h,000h,000h,05ch,05ch,05ch,05ch
+	   5C 5C 5C 00 00
+	   00 00 5C 5C 5C
+	   5C
+ 00000350  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch
+	   5C 5C 5C 5C 5C
+	   5C 5C 5C 5C 5C
+	   5C
+ 00000360  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,000h,000h,000h,000h,05ch,05ch,05ch,05ch,05ch,05ch,05ch
+	   00 00 00 00 5C
+	   5C 5C 5C 5C 5C
+	   5C
+ 00000370  5C 00 00 00 00		BYTE 05ch,000h,000h,000h,000h,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch
+	   5C 5C 5C 5C 5C
+	   5C 5C 5C 5C 5C
+	   5C
+ 00000380  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,000h,000h
+	   5C 5C 5C 5C 5C
+	   5C 5C 5C 5C 00
+	   00
+ 00000390  00 00 5C 5C 5C		BYTE 000h,000h,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,000h,000h,000h,000h,05ch,05ch
+	   5C 5C 5C 5C 5C
+	   00 00 00 00 5C
+	   5C
+ 000003A0  5C 00 00 00 00		BYTE 05ch,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+	   00 00 00 00 00
+	   00 00 00 00 00
+	   00
+ 000003B0  00 00 00 00 5C		BYTE 000h,000h,000h,000h,05ch,05ch,05ch,000h,000h,000h,000h,05ch,05ch,05ch,05ch,05ch
+	   5C 5C 00 00 00
+	   00 5C 5C 5C 5C
+	   5C
+ 000003C0  5C 5C 5C 00 00		BYTE 05ch,05ch,05ch,000h,000h,000h,000h,05ch,05ch,05ch,000h,000h,000h,000h,000h,000h
+	   00 00 5C 5C 5C
+	   00 00 00 00 00
+	   00
+ 000003D0  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,05ch,05ch,05ch
+	   00 00 00 00 00
+	   00 00 00 5C 5C
+	   5C
+ 000003E0  00 00 00 00 5C		BYTE 000h,000h,000h,000h,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,000h,000h,000h,000h
+	   5C 5C 5C 5C 5C
+	   5C 5C 00 00 00
+	   00
+ 000003F0  5C 5C 5C 00 00		BYTE 05ch,05ch,05ch,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+	   00 00 00 00 00
+	   00 00 00 00 00
+	   00
+ 00000400  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,000h,05ch,05ch,05ch,000h,000h,000h,000h,05ch,05ch,05ch
+	   00 5C 5C 5C 00
+	   00 00 00 5C 5C
+	   5C
+ 00000410  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,000h,000h,000h,000h,05ch,05ch,05ch,000h,000h,000h,000h
+	   00 00 00 00 5C
+	   5C 5C 00 00 00
+	   00
+ 00000420  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,05ch
+	   00 00 00 00 00
+	   00 00 00 00 00
+	   5C
+ 00000430  5C 5C 00 00 00		BYTE 05ch,05ch,000h,000h,000h,000h,05ch,05ch,05ch,05ch,000h,000h,000h,000h,000h,000h
+	   00 5C 5C 5C 5C
+	   00 00 00 00 00
+	   00
+ 00000440  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,000h,000h,000h
+	   5C 5C 5C 5C 5C
+	   5C 5C 5C 00 00
+	   00
+ 00000450  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,000h,000h,000h,000h,000h,000h,000h,000h
+	   5C 5C 5C 00 00
+	   00 00 00 00 00
+	   00
+ 00000460  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,05ch,05ch
+	   00 00 00 00 00
+	   00 00 00 00 5C
+	   5C
+ 00000470  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,000h,000h,000h,05ch,05ch,05ch,05ch,05ch,05ch,05ch
+	   5C 00 00 00 5C
+	   5C 5C 5C 5C 5C
+	   5C
+ 00000480  5C 00 00 00 00		BYTE 05ch,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+	   00 00 00 00 00
+	   00 00 00 00 00
+	   00
+ 00000490  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,000h,000h,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,000h
+	   00 00 5C 5C 5C
+	   5C 5C 5C 5C 5C
+	   00
+ 000004A0  00 00 5C 5C 5C		BYTE 000h,000h,05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,000h,000h,000h,000h,000h,000h
+	   5C 5C 5C 5C 5C
+	   00 00 00 00 00
+	   00
+ 000004B0  00 00 00 00 00		BYTE 000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+	   00 00 00 00 00
+	   00 00 00 00 00
+	   00
+ 000004C0  5C 5C 5C 5C 5C		BYTE 05ch,05ch,05ch,05ch,05ch,05ch,05ch,05ch,000h,000h,000h,05ch,05ch,05ch,05ch,05ch
+	   5C 5C 5C 00 00
+	   00 5C 5C 5C 5C
+	   5C
+ 000004D0  5C 5C 5C 00 00		BYTE 05ch,05ch,05ch,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+	   00 00 00 00 00
+	   00 00 00 00
+
+ 000004DE 0000003B		explosion EECS205BITMAP <59, 61, 255,, offset explosion + sizeof explosion>
+	   0000003D FF
+	   00000003 [
+	    00
+	   ] 000004EE R
+ 000004EE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000004FE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000050E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000051E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000052E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000053E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000054E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000055E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000056E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000057E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000058E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000059E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000005AE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000005BE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000005CE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000005DE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000005EE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000005FE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000060E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000061E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000062E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000063E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000064E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000065E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000066E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000067E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000068E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000069E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000006AE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000006BE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000006CE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000006DE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000006EE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000006FE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000070E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000071E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000072E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000073E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000074E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,020h,020h,000h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF 20 20 00
+	   FF FF FF FF FF
+	   FF
+ 0000075E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000076E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000077E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,000h
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   00
+ 0000078E  20 20 20 20 20		BYTE 020h,020h,020h,020h,020h,020h,020h,020h,044h,0ffh,0ffh,0ffh,0ffh,0ffh,044h,024h
+	   20 20 20 44 FF
+	   FF FF FF FF 44
+	   24
+ 0000079E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000007AE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000007BE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,020h,020h,020h,020h,020h,040h
+	   FF FF FF FF FF
+	   20 20 20 20 20
+	   40
+ 000007CE  44 44 64 68 44		BYTE 044h,044h,064h,068h,044h,068h,020h,020h,000h,024h,024h,024h,044h,044h,024h,0ffh
+	   68 20 20 00 24
+	   24 24 44 44 24
+	   FF
+ 000007DE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000007EE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000007FE  FF FF FF FF 00		BYTE 0ffh,0ffh,0ffh,0ffh,000h,020h,0ffh,0ffh,020h,040h,044h,044h,088h,0ach,0ach,088h
+	   20 FF FF 20 40
+	   44 44 88 AC AC
+	   88
+ 0000080E  88 A8 88 88 68		BYTE 088h,0a8h,088h,088h,068h,044h,020h,044h,044h,064h,044h,0ffh,0ffh,0ffh,0ffh,0ffh
+	   44 20 44 44 64
+	   44 FF FF FF FF
+	   FF
+ 0000081E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000082E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,020h,020h,020h
+	   FF FF FF FF FF
+	   FF FF FF 20 20
+	   20
+ 0000083E  20 00 20 20 44		BYTE 020h,000h,020h,020h,044h,088h,0a8h,0f5h,0f5h,0f9h,0f5h,0ech,0f0h,0ech,0ach,0ach
+	   88 A8 F5 F5 F9
+	   F5 EC F0 EC AC
+	   AC
+ 0000084E  AC AC A8 88 C8		BYTE 0ach,0ach,0a8h,088h,0c8h,0a8h,064h,020h,020h,020h,000h,0ffh,0ffh,0ffh,0ffh,0ffh
+	   A8 64 20 20 20
+	   00 FF FF FF FF
+	   FF
+ 0000085E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000086E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,020h,020h,020h,020h,044h,064h,068h,0ach
+	   FF FF FF 20 20
+	   20 20 44 64 68
+	   AC
+ 0000087E  D1 F5 F9 FD FE		BYTE 0d1h,0f5h,0f9h,0fdh,0feh,0f9h,0f0h,0f5h,0f1h,0f1h,0ach,0ach,0ech,0f0h,0f0h,0f0h
+	   F9 F0 F5 F1 F1
+	   AC AC EC F0 F0
+	   F0
+ 0000088E  EC A8 A8 44 44		BYTE 0ech,0a8h,0a8h,044h,044h,044h,020h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   44 20 FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000089E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,000h,000h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF 00 00 FF FF
+	   FF FF FF FF FF
+	   FF
+ 000008AE  FF FF 20 20 20		BYTE 0ffh,0ffh,020h,020h,020h,064h,064h,084h,088h,0ach,0cch,0d1h,0f9h,0fdh,0fdh,0fdh
+	   64 64 84 88 AC
+	   CC D1 F9 FD FD
+	   FD
+ 000008BE  FD F0 F5 F5 F5		BYTE 0fdh,0f0h,0f5h,0f5h,0f5h,0d1h,0cch,0cch,0f0h,0f0h,0f0h,0f4h,0ech,0c8h,084h,064h
+	   D1 CC CC F0 F0
+	   F0 F4 EC C8 84
+	   64
+ 000008CE  64 44 20 FF FF		BYTE 064h,044h,020h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000008DE  40 44 64 44 20		BYTE 040h,044h,064h,044h,020h,020h,020h,0ffh,0ffh,0ffh,0ffh,0ffh,020h,044h,020h,064h
+	   20 20 FF FF FF
+	   FF FF 20 44 20
+	   64
+ 000008EE  64 64 88 A8 CC		BYTE 064h,064h,088h,0a8h,0cch,0d0h,0f9h,0f9h,0f9h,0fdh,0fdh,0fdh,0f8h,0fdh,0fdh,0fdh
+	   D0 F9 F9 F9 FD
+	   FD FD F8 FD FD
+	   FD
+ 000008FE  FD F5 F4 F4 F4		BYTE 0fdh,0f5h,0f4h,0f4h,0f4h,0f9h,0f8h,0f0h,0c8h,0a8h,044h,040h,044h,020h,020h,0ffh
+	   F9 F8 F0 C8 A8
+	   44 40 44 20 20
+	   FF
+ 0000090E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,020h,040h,064h,064h,044h,020h
+	   FF FF FF FF FF
+	   20 40 64 64 44
+	   20
+ 0000091E  20 20 24 20 FF		BYTE 020h,020h,024h,020h,0ffh,0ffh,0ffh,020h,020h,064h,084h,0a8h,0fah,0cch,0ech,0ech
+	   FF FF 20 20 64
+	   84 A8 FA CC EC
+	   EC
+ 0000092E  F4 FD FD FD FD		BYTE 0f4h,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0f9h,0f0h,0f9h,0fdh
+	   FD FD FD FD FD
+	   FD FD F9 F0 F9
+	   FD
+ 0000093E  FD FD F9 F0 C8		BYTE 0fdh,0fdh,0f9h,0f0h,0c8h,064h,020h,020h,020h,020h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   64 20 20 20 20
+	   FF FF FF FF FF
+	   FF
+ 0000094E  FF FF 00 40 40		BYTE 0ffh,0ffh,000h,040h,040h,040h,040h,044h,044h,020h,020h,0ffh,020h,020h,020h,020h
+	   40 40 44 44 20
+	   20 FF 20 20 20
+	   20
+ 0000095E  20 40 20 44 84		BYTE 020h,040h,020h,044h,084h,0a8h,0f0h,0f8h,0f0h,0f9h,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh
+	   A8 F0 F8 F0 F9
+	   FD FD FD FD FD
+	   FD
+ 0000096E  FD FD FD FD FE		BYTE 0fdh,0fdh,0fdh,0fdh,0feh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0f0h
+	   FD FD FD FD FD
+	   FD FD FD FD FD
+	   F0
+ 0000097E  88 68 44 00 20		BYTE 088h,068h,044h,000h,020h,020h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,020h,044h,040h,040h
+	   20 FF FF FF FF
+	   FF FF 20 44 40
+	   40
+ 0000098E  40 40 44 40 40		BYTE 040h,040h,044h,040h,040h,020h,020h,020h,020h,020h,020h,044h,064h,0a8h,0a8h,0ech
+	   20 20 20 20 20
+	   20 44 64 A8 A8
+	   EC
+ 0000099E  F0 F4 FD F4 F9		BYTE 0f0h,0f4h,0fdh,0f4h,0f9h,0fdh,0feh,0fdh,0fdh,0fdh,0feh,0feh,0fdh,0fdh,0fdh,0fdh
+	   FD FE FD FD FD
+	   FE FE FD FD FD
+	   FD
+ 000009AE  FD FD FD FD FD		BYTE 0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0feh,0feh,0fdh,0f4h,0cch,088h,064h,064h,064h
+	   FD FD FE FE FD
+	   F4 CC 88 64 64
+	   64
+ 000009BE  44 00 FF FF FF		BYTE 044h,000h,0ffh,0ffh,0ffh,0ffh,0ffh,040h,020h,044h,040h,044h,044h,044h,044h,044h
+	   FF FF 40 20 44
+	   40 44 44 44 44
+	   44
+ 000009CE  40 40 20 40 40		BYTE 040h,040h,020h,040h,040h,064h,088h,0a8h,0f0h,0ech,0f0h,0f8h,0fch,0f8h,0fch,0f8h
+	   64 88 A8 F0 EC
+	   F0 F8 FC F8 FC
+	   F8
+ 000009DE  FD FE FE FD FD		BYTE 0fdh,0feh,0feh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh
+	   FD FD FD FD FD
+	   FD FD FD FD FD
+	   FD
+ 000009EE  FD FD FD FE FD		BYTE 0fdh,0fdh,0fdh,0feh,0fdh,0f9h,0ech,088h,064h,064h,088h,064h,044h,0ffh,0ffh,0ffh
+	   F9 EC 88 64 64
+	   88 64 44 FF FF
+	   FF
+ 000009FE  FF FF 20 24 44		BYTE 0ffh,0ffh,020h,024h,044h,044h,064h,044h,044h,064h,064h,040h,040h,040h,020h,044h
+	   44 64 44 44 64
+	   64 40 40 40 20
+	   44
+ 00000A0E  68 F5 F5 F9 F9		BYTE 068h,0f5h,0f5h,0f9h,0f9h,0f8h,0fdh,0fdh,0fdh,0fdh,0fch,0fdh,0fdh,0fdh,0fdh,0fdh
+	   F8 FD FD FD FD
+	   FC FD FD FD FD
+	   FD
+ 00000A1E  FD FD FD FE FD		BYTE 0fdh,0fdh,0fdh,0feh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0f9h
+	   FD FD FD FD FD
+	   FD FD FD FD FD
+	   F9
+ 00000A2E  F4 F0 A8 88 88		BYTE 0f4h,0f0h,0a8h,088h,088h,064h,088h,064h,020h,0ffh,0ffh,0ffh,0ffh,000h,020h,024h
+	   64 88 64 20 FF
+	   FF FF FF 00 20
+	   24
+ 00000A3E  44 44 44 64 64		BYTE 044h,044h,044h,064h,064h,064h,040h,040h,020h,044h,08ch,088h,0f9h,0fdh,0f5h,0fdh
+	   64 40 40 20 44
+	   8C 88 F9 FD F5
+	   FD
+ 00000A4E  FD FD FD FD FD		BYTE 0fdh,0fdh,0fdh,0fdh,0fdh,0fch,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0feh,0feh,0feh
+	   FC FD FD FD FD
+	   FD FD FD FE FE
+	   FE
+ 00000A5E  FD FD FD FD FD		BYTE 0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0f9h,0f9h,0f0h,0cch,088h,088h
+	   FD FD FD FD FD
+	   F9 F9 F0 CC 88
+	   88
+ 00000A6E  88 88 A8 20 FF		BYTE 088h,088h,0a8h,020h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,000h,024h,044h,044h,064h
+	   FF FF FF FF FF
+	   FF 00 24 44 44
+	   64
+ 00000A7E  64 44 44 44 88		BYTE 064h,044h,044h,044h,088h,0cch,0d0h,0f5h,0fdh,0f4h,0feh,0fdh,0fdh,0fdh,0fdh,0feh
+	   CC D0 F5 FD F4
+	   FE FD FD FD FD
+	   FE
+ 00000A8E  FD FD FD FD FD		BYTE 0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0feh,0fdh,0feh,0feh,0feh,0fdh,0fdh,0feh,0fdh,0fdh
+	   FD FE FD FE FE
+	   FE FD FD FE FD
+	   FD
+ 00000A9E  FD FD FD FD FD		BYTE 0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0f4h,0f0h,0a8h,088h,088h,0a8h,088h,064h,0ffh
+	   FD FD F4 F0 A8
+	   88 88 A8 88 64
+	   FF
+ 00000AAE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,020h,020h,044h,044h,064h,064h,044h,064h,0a8h
+	   FF FF 20 20 44
+	   44 64 64 44 64
+	   A8
+ 00000ABE  F0 F9 F4 F8 F8		BYTE 0f0h,0f9h,0f4h,0f8h,0f8h,0f0h,0fch,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh
+	   F0 FC FD FD FD
+	   FD FD FD FD FD
+	   FD
+ 00000ACE  FE FE FD FE FE		BYTE 0feh,0feh,0fdh,0feh,0feh,0feh,0feh,0feh,0feh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh
+	   FE FE FE FE FD
+	   FD FD FD FD FD
+	   FD
+ 00000ADE  FD FD F4 F4 F0		BYTE 0fdh,0fdh,0f4h,0f4h,0f0h,088h,064h,088h,0a8h,0a8h,020h,0ffh,0ffh,0ffh,000h,000h
+	   88 64 88 A8 A8
+	   20 FF FF FF 00
+	   00
+ 00000AEE  20 00 20 20 20		BYTE 020h,000h,020h,020h,020h,040h,064h,064h,044h,088h,0c8h,0cch,0f0h,0f4h,0f4h,0fch
+	   40 64 64 44 88
+	   C8 CC F0 F4 F4
+	   FC
+ 00000AFE  F8 FE FD FD FD		BYTE 0f8h,0feh,0fdh,0fdh,0fdh,0fdh,0fch,0fdh,0fdh,0fdh,0fdh,0feh,0ffh,0fdh,0feh,0feh
+	   FD FC FD FD FD
+	   FD FE FF FD FE
+	   FE
+ 00000B0E  FE FE FE FE FD		BYTE 0feh,0feh,0feh,0feh,0fdh,0fdh,0fdh,0fdh,0feh,0fdh,0fdh,0fdh,0fdh,0f9h,0f4h,0f5h
+	   FD FD FD FE FD
+	   FD FD FD F9 F4
+	   F5
+ 00000B1E  F0 88 88 A8 88		BYTE 0f0h,088h,088h,0a8h,088h,044h,0ffh,0ffh,0ffh,044h,044h,044h,024h,020h,020h,044h
+	   44 FF FF FF 44
+	   44 44 24 20 20
+	   44
+ 00000B2E  40 64 84 88 C8		BYTE 040h,064h,084h,088h,0c8h,0c8h,0ech,0f4h,0f8h,0fdh,0fdh,0fch,0feh,0fdh,0feh,0fdh
+	   C8 EC F4 F8 FD
+	   FD FC FE FD FE
+	   FD
+ 00000B3E  F8 FE FD FD FD		BYTE 0f8h,0feh,0fdh,0fdh,0fdh,0feh,0feh,0feh,0feh,0feh,0feh,0feh,0feh,0feh,0feh,0feh
+	   FE FE FE FE FE
+	   FE FE FE FE FE
+	   FE
+ 00000B4E  FD FD FD FD FD		BYTE 0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0f4h,0f4h,0f0h,0cch,088h,084h,084h
+	   FD FD FD FD F4
+	   F4 F0 CC 88 84
+	   84
+ 00000B5E  40 FF FF FF 68		BYTE 040h,0ffh,0ffh,0ffh,068h,064h,044h,020h,020h,020h,044h,088h,0c8h,0e8h,0ech,0ech
+	   64 44 20 20 20
+	   44 88 C8 E8 EC
+	   EC
+ 00000B6E  EC EC F0 F4 FD		BYTE 0ech,0ech,0f0h,0f4h,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0f4h,0f8h,0fch,0feh,0fdh,0fdh
+	   FD FD FD FD FD
+	   F4 F8 FC FE FD
+	   FD
+ 00000B7E  FD FD FD FD FE		BYTE 0fdh,0fdh,0fdh,0fdh,0feh,0feh,0ffh,0ffh,0ffh,0ffh,0feh,0feh,0fdh,0fdh,0fdh,0fdh
+	   FE FF FF FF FF
+	   FE FE FD FD FD
+	   FD
+ 00000B8E  FD FD FD FD FD		BYTE 0fdh,0fdh,0fdh,0fdh,0fdh,0f0h,0f0h,0f0h,0cch,0a8h,064h,040h,0ffh,0ffh,0ffh,064h
+	   F0 F0 F0 CC A8
+	   64 40 FF FF FF
+	   64
+ 00000B9E  64 64 44 44 64		BYTE 064h,064h,044h,044h,064h,0a8h,0f0h,0ech,0c8h,0ech,0f0h,0ech,0f0h,0f4h,0f8h,0fdh
+	   A8 F0 EC C8 EC
+	   F0 EC F0 F4 F8
+	   FD
+ 00000BAE  FD FD FC FC F8		BYTE 0fdh,0fdh,0fch,0fch,0f8h,0f8h,0f8h,0f8h,0fdh,0fdh,0fdh,0ffh,0fdh,0fdh,0fdh,0fdh
+	   F8 F8 F8 FD FD
+	   FD FF FD FD FD
+	   FD
+ 00000BBE  FE FE FF FF FE		BYTE 0feh,0feh,0ffh,0ffh,0feh,0feh,0fdh,0feh,0feh,0fdh,0fdh,0feh,0fdh,0fdh,0fdh,0f9h
+	   FE FD FE FE FD
+	   FD FE FD FD FD
+	   F9
+ 00000BCE  F4 F0 EC EC A8		BYTE 0f4h,0f0h,0ech,0ech,0a8h,064h,020h,0ffh,0ffh,0ffh,064h,064h,044h,044h,064h,088h
+	   64 20 FF FF FF
+	   64 64 44 44 64
+	   88
+ 00000BDE  EC EC CC EC EC		BYTE 0ech,0ech,0cch,0ech,0ech,0f0h,0f0h,0f0h,0f8h,0f8h,0fdh,0fdh,0fdh,0fdh,0fch,0fdh
+	   F0 F0 F0 F8 F8
+	   FD FD FD FD FC
+	   FD
+ 00000BEE  FD FC F8 FE FD		BYTE 0fdh,0fch,0f8h,0feh,0fdh,0feh,0ffh,0feh,0fdh,0fdh,0feh,0feh,0feh,0feh,0ffh,0feh
+	   FE FF FE FD FD
+	   FE FE FE FE FF
+	   FE
+ 00000BFE  FE FD FD FE FD		BYTE 0feh,0fdh,0fdh,0feh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0f9h,0f4h,0f0h,0ech,0ech,088h
+	   FD FD FD FD FD
+	   F9 F4 F0 EC EC
+	   88
+ 00000C0E  64 FF FF FF FF		BYTE 064h,0ffh,0ffh,0ffh,0ffh,064h,064h,064h,068h,0ach,0ech,0ech,0ech,0c8h,0ech,0ech
+	   64 64 64 68 AC
+	   EC EC EC C8 EC
+	   EC
+ 00000C1E  F0 F4 F4 FD FD		BYTE 0f0h,0f4h,0f4h,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0feh
+	   FD FD FD FD FD
+	   FD FD FD FD FD
+	   FE
+ 00000C2E  FD FD FE FD FE		BYTE 0fdh,0fdh,0feh,0fdh,0feh,0feh,0fdh,0feh,0feh,0feh,0feh,0feh,0feh,0feh,0fdh,0fdh
+	   FE FD FE FE FE
+	   FE FE FE FE FD
+	   FD
+ 00000C3E  FD FD FD FD FD		BYTE 0fdh,0fdh,0fdh,0fdh,0fdh,0f4h,0f4h,0f0h,0cch,0a8h,068h,020h,0ffh,0ffh,0ffh,0ffh
+	   F4 F4 F0 CC A8
+	   68 20 FF FF FF
+	   FF
+ 00000C4E  68 64 64 88 CC		BYTE 068h,064h,064h,088h,0cch,0f0h,0ech,0cch,0cch,0f0h,0f0h,0f0h,0f4h,0f8h,0f8h,0fdh
+	   F0 EC CC CC F0
+	   F0 F0 F4 F8 F8
+	   FD
+ 00000C5E  FD FD FE FD FD		BYTE 0fdh,0fdh,0feh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0feh,0feh,0feh,0feh
+	   FD FD FD FD FD
+	   FD FD FE FE FE
+	   FE
+ 00000C6E  FE FE FE FE FE		BYTE 0feh,0feh,0feh,0feh,0feh,0feh,0feh,0feh,0feh,0feh,0feh,0fdh,0fdh,0fdh,0fdh,0fdh
+	   FE FE FE FE FE
+	   FE FD FD FD FD
+	   FD
+ 00000C7E  F0 F4 CC 88 44		BYTE 0f0h,0f4h,0cch,088h,044h,044h,0ffh,0ffh,0ffh,0ffh,0ffh,068h,068h,064h,0ach,0f0h
+	   44 FF FF FF FF
+	   FF 68 68 64 AC
+	   F0
+ 00000C8E  EC EC CC F0 F0		BYTE 0ech,0ech,0cch,0f0h,0f0h,0ech,0f0h,0f8h,0f8h,0f8h,0fdh,0fdh,0fdh,0feh,0fdh,0fdh
+	   EC F0 F8 F8 F8
+	   FD FD FD FE FD
+	   FD
+ 00000C9E  FD FD FE FE FD		BYTE 0fdh,0fdh,0feh,0feh,0fdh,0fdh,0ffh,0feh,0feh,0feh,0feh,0feh,0feh,0feh,0feh,0feh
+	   FD FF FE FE FE
+	   FE FE FE FE FE
+	   FE
+ 00000CAE  FD FE FE FE FF		BYTE 0fdh,0feh,0feh,0feh,0ffh,0feh,0fdh,0fdh,0fdh,0fdh,0f9h,0f0h,0f0h,0ach,064h,020h
+	   FE FD FD FD FD
+	   F9 F0 F0 AC 64
+	   20
+ 00000CBE  24 20 FF FF FF		BYTE 024h,020h,0ffh,0ffh,0ffh,0ffh,044h,064h,064h,0ech,0f0h,0f0h,0cch,0ech,0f4h,0f0h
+	   FF 44 64 64 EC
+	   F0 F0 CC EC F4
+	   F0
+ 00000CCE  F0 F4 F9 F4 F4		BYTE 0f0h,0f4h,0f9h,0f4h,0f4h,0f8h,0fdh,0fdh,0fdh,0fdh,0fdh,0feh,0feh,0feh,0feh,0ffh
+	   F8 FD FD FD FD
+	   FD FE FE FE FE
+	   FF
+ 00000CDE  FD FE FE FD FD		BYTE 0fdh,0feh,0feh,0fdh,0fdh,0feh,0feh,0feh,0feh,0feh,0fdh,0feh,0feh,0feh,0feh,0feh
+	   FE FE FE FE FE
+	   FD FE FE FE FE
+	   FE
+ 00000CEE  FE FD FD FD FD		BYTE 0feh,0fdh,0fdh,0fdh,0fdh,0f4h,0f0h,0ech,0ach,024h,020h,020h,0ffh,0ffh,0ffh,0ffh
+	   F4 F0 EC AC 24
+	   20 20 FF FF FF
+	   FF
+ 00000CFE  FF 20 44 44 AC		BYTE 0ffh,020h,044h,044h,0ach,0cch,0f1h,0f0h,0f0h,0f0h,0f0h,0f4h,0f4h,0fdh,0f5h,0f4h
+	   CC F1 F0 F0 F0
+	   F0 F4 F4 FD F5
+	   F4
+ 00000D0E  F4 FD FD FD FE		BYTE 0f4h,0fdh,0fdh,0fdh,0feh,0feh,0feh,0feh,0fdh,0feh,0feh,0fdh,0fdh,0fdh,0fdh,0fdh
+	   FE FE FE FD FE
+	   FE FD FD FD FD
+	   FD
+ 00000D1E  FD FE FD FD FE		BYTE 0fdh,0feh,0fdh,0fdh,0feh,0fdh,0fdh,0fdh,0feh,0ffh,0feh,0feh,0fdh,0fdh,0fdh,0fdh
+	   FD FD FD FE FF
+	   FE FE FD FD FD
+	   FD
+ 00000D2E  F4 F0 A8 44 44		BYTE 0f4h,0f0h,0a8h,044h,044h,020h,044h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,024h,068h,0ach
+	   20 44 FF FF FF
+	   FF FF FF 24 68
+	   AC
+ 00000D3E  AC D0 F0 D0 CC		BYTE 0ach,0d0h,0f0h,0d0h,0cch,0f0h,0f4h,0f5h,0fdh,0f9h,0f5h,0f8h,0fdh,0fdh,0fdh,0fdh
+	   F0 F4 F5 FD F9
+	   F5 F8 FD FD FD
+	   FD
+ 00000D4E  FD FD FD FE FE		BYTE 0fdh,0fdh,0fdh,0feh,0feh,0feh,0fdh,0fdh,0feh,0feh,0feh,0fdh,0fdh,0fdh,0feh,0feh
+	   FE FD FD FE FE
+	   FE FD FD FD FE
+	   FE
+ 00000D5E  FD FD FD FE FE		BYTE 0fdh,0fdh,0fdh,0feh,0feh,0feh,0feh,0fdh,0fdh,0fdh,0fdh,0f4h,0ech,0a8h,064h,044h
+	   FE FE FD FD FD
+	   FD F4 EC A8 64
+	   44
+ 00000D6E  44 20 FF FF FF		BYTE 044h,020h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,024h,088h,0ach,0ach,0ach,0ach,0cch
+	   FF FF FF FF 24
+	   88 AC AC AC AC
+	   CC
+ 00000D7E  EC F0 F0 F9 F9		BYTE 0ech,0f0h,0f0h,0f9h,0f9h,0fdh,0f8h,0f8h,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0feh,0feh
+	   FD F8 F8 FD FD
+	   FD FD FD FD FE
+	   FE
+ 00000D8E  FE FD FE FE FE		BYTE 0feh,0fdh,0feh,0feh,0feh,0feh,0fdh,0fdh,0feh,0feh,0feh,0feh,0fdh,0fdh,0fdh,0fdh
+	   FE FD FD FE FE
+	   FE FE FD FD FD
+	   FD
+ 00000D9E  FD FD FD FD FD		BYTE 0fdh,0fdh,0fdh,0fdh,0fdh,0f9h,0f4h,0f0h,0a8h,084h,088h,064h,020h,0ffh,0ffh,0ffh
+	   F9 F4 F0 A8 84
+	   88 64 20 FF FF
+	   FF
+ 00000DAE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,020h,088h,0cch,0cch,0cch,0ach,0cch,0ech,0ech,0f4h,0fdh
+	   20 88 CC CC CC
+	   AC CC EC EC F4
+	   FD
+ 00000DBE  FD F0 F4 F4 FD		BYTE 0fdh,0f0h,0f4h,0f4h,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0ffh,0ffh,0ffh
+	   FD FD FD FD FD
+	   FD FD FD FF FF
+	   FF
+ 00000DCE  FE FD FD FD FE		BYTE 0feh,0fdh,0fdh,0fdh,0feh,0ffh,0feh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0f8h
+	   FF FE FD FD FD
+	   FD FD FD FD FD
+	   F8
+ 00000DDE  F4 F0 F0 A8 88		BYTE 0f4h,0f0h,0f0h,0a8h,088h,064h,040h,040h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   64 40 40 FF FF
+	   FF FF FF FF FF
+	   FF
+ 00000DEE  20 64 84 A8 CC		BYTE 020h,064h,084h,0a8h,0cch,0ach,0cch,0cch,0c8h,0ech,0f0h,0f0h,0f0h,0f0h,0f4h,0f4h
+	   AC CC CC C8 EC
+	   F0 F0 F0 F0 F4
+	   F4
+ 00000DFE  FD FD FD F8 FD		BYTE 0fdh,0fdh,0fdh,0f8h,0fdh,0fdh,0fdh,0fdh,0feh,0feh,0feh,0feh,0fdh,0fdh,0fdh,0ffh
+	   FD FD FD FE FE
+	   FE FE FD FD FD
+	   FF
+ 00000E0E  FE FE FD FD F4		BYTE 0feh,0feh,0fdh,0fdh,0f4h,0f8h,0f8h,0f8h,0f4h,0f8h,0f9h,0f4h,0f4h,0ech,084h,044h
+	   F8 F8 F8 F4 F8
+	   F9 F4 F4 EC 84
+	   44
+ 00000E1E  40 40 40 FF FF		BYTE 040h,040h,040h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,020h,064h,088h,0ach,0ach
+	   FF FF FF FF FF
+	   FF 20 64 88 AC
+	   AC
+ 00000E2E  88 C8 C8 C8 EC		BYTE 088h,0c8h,0c8h,0c8h,0ech,0f0h,0ech,0f0h,0f0h,0f4h,0f4h,0f4h,0f4h,0fdh,0f8h,0f4h
+	   F0 EC F0 F0 F4
+	   F4 F4 F4 FD F8
+	   F4
+ 00000E3E  F8 FD FD FE FE		BYTE 0f8h,0fdh,0fdh,0feh,0feh,0feh,0feh,0feh,0fdh,0fdh,0feh,0fdh,0f9h,0f4h,0f9h,0f4h
+	   FE FE FE FD FD
+	   FE FD F9 F4 F9
+	   F4
+ 00000E4E  F4 F0 F4 F4 F4		BYTE 0f4h,0f0h,0f4h,0f4h,0f4h,0f8h,0f4h,0f4h,0a8h,084h,040h,040h,040h,020h,0ffh,0ffh
+	   F8 F4 F4 A8 84
+	   40 40 40 20 FF
+	   FF
+ 00000E5E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,020h,064h,064h,068h,044h,044h,0ech,0ech,0ech,0ech
+	   FF 20 64 64 68
+	   44 44 EC EC EC
+	   EC
+ 00000E6E  EC EC EC F0 F0		BYTE 0ech,0ech,0ech,0f0h,0f0h,0f0h,0f0h,0f0h,0f0h,0fdh,0f0h,0f4h,0f0h,0fdh,0fdh,0feh
+	   F0 F0 F0 F0 FD
+	   F0 F4 F0 FD FD
+	   FE
+ 00000E7E  FE FE FE FD FD		BYTE 0feh,0feh,0feh,0fdh,0fdh,0fdh,0fdh,0f5h,0f0h,0f4h,0f4h,0f4h,0f0h,0f4h,0f4h,0f8h
+	   FD FD F5 F0 F4
+	   F4 F4 F0 F4 F4
+	   F8
+ 00000E8E  F4 F4 F0 CC 84		BYTE 0f4h,0f4h,0f0h,0cch,084h,040h,040h,020h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   40 40 20 FF FF
+	   FF FF FF FF FF
+	   FF
+ 00000E9E  FF 00 24 68 68		BYTE 0ffh,000h,024h,068h,068h,068h,088h,0cch,0ech,0ech,0ech,0ech,0ech,0ech,0f0h,0f0h
+	   68 88 CC EC EC
+	   EC EC EC EC F0
+	   F0
+ 00000EAE  F0 F0 F0 F0 F0		BYTE 0f0h,0f0h,0f0h,0f0h,0f0h,0f0h,0f0h,0f0h,0f4h,0fdh,0feh,0fdh,0feh,0fdh,0fdh,0fdh
+	   F0 F0 F0 F4 FD
+	   FE FD FE FD FD
+	   FD
+ 00000EBE  FD F9 F5 F5 F9		BYTE 0fdh,0f9h,0f5h,0f5h,0f9h,0f8h,0f8h,0f4h,0f4h,0f4h,0f4h,0f4h,0ech,0cch,088h,0a4h
+	   F8 F8 F4 F4 F4
+	   F4 F4 EC CC 88
+	   A4
+ 00000ECE  64 20 FF FF FF		BYTE 064h,020h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,024h,044h,068h,06ch
+	   FF FF FF FF FF
+	   FF FF 24 44 68
+	   6C
+ 00000EDE  8C 88 A8 F0 F0		BYTE 08ch,088h,0a8h,0f0h,0f0h,0ech,0ech,0ech,0f0h,0ech,0cch,0f0h,0f0h,0f0h,0f0h,0ech
+	   EC EC EC F0 EC
+	   CC F0 F0 F0 F0
+	   EC
+ 00000EEE  EC F0 F4 F8 FC		BYTE 0ech,0f0h,0f4h,0f8h,0fch,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0f9h,0f9h,0fdh,0fdh
+	   FD FD FD FD FD
+	   FD FD F9 F9 FD
+	   FD
+ 00000EFE  F4 F4 F8 F8 F8		BYTE 0f4h,0f4h,0f8h,0f8h,0f8h,0f4h,0cch,0cch,0c8h,0c8h,0a8h,040h,0ffh,0ffh,0ffh,0ffh
+	   F4 CC CC C8 C8
+	   A8 40 FF FF FF
+	   FF
+ 00000F0E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,044h,048h,068h,068h,088h,0ach,0ech,0f0h
+	   FF FF FF 44 48
+	   68 68 88 AC EC
+	   F0
+ 00000F1E  EC EC F0 F0 F0		BYTE 0ech,0ech,0f0h,0f0h,0f0h,0ech,0ech,0f0h,0f0h,0f0h,0f0h,0ech,0cch,0f0h,0f4h,0f4h
+	   EC EC F0 F0 F0
+	   F0 EC CC F0 F4
+	   F4
+ 00000F2E  F8 FD FD FD FD		BYTE 0f8h,0fdh,0fdh,0fdh,0fdh,0fdh,0fdh,0f9h,0f9h,0f9h,0f5h,0f4h,0f9h,0f8h,0f4h,0f0h
+	   FD FD F9 F9 F9
+	   F5 F4 F9 F8 F4
+	   F0
+ 00000F3E  EC A8 C8 A8 A8		BYTE 0ech,0a8h,0c8h,0a8h,0a8h,084h,000h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   84 00 FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00000F4E  FF FF FF FF 68		BYTE 0ffh,0ffh,0ffh,0ffh,068h,048h,044h,068h,0a8h,0cch,0f4h,0f0h,0f0h,0f4h,0f4h,0f4h
+	   48 44 68 A8 CC
+	   F4 F0 F0 F4 F4
+	   F4
+ 00000F5E  EC EC EC EC F0		BYTE 0ech,0ech,0ech,0ech,0f0h,0ech,0a8h,0a8h,0ach,0ech,0f0h,0f4h,0fdh,0fdh,0fdh,0fdh
+	   EC A8 A8 AC EC
+	   F0 F4 FD FD FD
+	   FD
+ 00000F6E  FD F9 F9 F5 F0		BYTE 0fdh,0f9h,0f9h,0f5h,0f0h,0f0h,0f0h,0f5h,0f5h,0f0h,0ech,0cch,0c8h,084h,064h,064h
+	   F0 F0 F5 F5 F0
+	   EC CC C8 84 64
+	   64
+ 00000F7E  20 FF FF FF FF		BYTE 020h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00000F8E  44 44 44 88 A8		BYTE 044h,044h,044h,088h,0a8h,0cch,0ech,0f0h,0f4h,0f4h,0f4h,0f0h,0f0h,0f0h,0f0h,0ech
+	   CC EC F0 F4 F4
+	   F4 F0 F0 F0 F0
+	   EC
+ 00000F9E  CC CC AC AC AC		BYTE 0cch,0cch,0ach,0ach,0ach,0cch,0f0h,0fdh,0fch,0fdh,0fdh,0f9h,0f4h,0f0h,0f0h,0ech
+	   CC F0 FD FC FD
+	   FD F9 F4 F0 F0
+	   EC
+ 00000FAE  F0 D0 F1 D1 F1		BYTE 0f0h,0d0h,0f1h,0d1h,0f1h,0ach,088h,064h,044h,040h,040h,0ffh,0ffh,0ffh,0ffh,0ffh
+	   AC 88 64 44 40
+	   40 FF FF FF FF
+	   FF
+ 00000FBE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,020h,044h,020h,064h
+	   FF FF FF FF FF
+	   FF FF 20 44 20
+	   64
+ 00000FCE  A8 EC F0 F4 F4		BYTE 0a8h,0ech,0f0h,0f4h,0f4h,0f4h,0f0h,0f0h,0ech,0cch,0cch,0ech,0ech,0cch,0cch,0ach
+	   F4 F0 F0 EC CC
+	   CC EC EC CC CC
+	   AC
+ 00000FDE  88 88 A8 EC F0		BYTE 088h,088h,0a8h,0ech,0f0h,0f0h,0f0h,0cch,0a8h,0ach,0ach,0cch,0cch,0d0h,0f1h,0f1h
+	   F0 F0 CC A8 AC
+	   AC CC CC D0 F1
+	   F1
+ 00000FEE  88 64 40 44 64		BYTE 088h,064h,040h,044h,064h,040h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   40 FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00000FFE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,020h,044h,044h,064h,0a8h,0ech,0ech
+	   FF FF FF FF 20
+	   44 44 64 A8 EC
+	   EC
+ 0000100E  EC EC EC A8 A8		BYTE 0ech,0ech,0ech,0a8h,0a8h,0ech,0ech,0cch,0cch,0cch,0ach,0a8h,064h,064h,084h,0c8h
+	   EC EC CC CC CC
+	   AC A8 64 64 84
+	   C8
+ 0000101E  C8 CC AC 88 88		BYTE 0c8h,0cch,0ach,088h,088h,0a8h,0cch,0ach,0cch,0cch,0cch,064h,020h,020h,044h,064h
+	   A8 CC AC CC CC
+	   CC 64 20 20 44
+	   64
+ 0000102E  40 FF FF FF FF		BYTE 040h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000103E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,000h,020h,044h,064h,088h,0a8h,0a8h,0a8h,0cch
+	   FF FF 00 20 44
+	   64 88 A8 A8 A8
+	   CC
+ 0000104E  CC CC CC A8 CC		BYTE 0cch,0cch,0cch,0a8h,0cch,0cch,088h,044h,044h,084h,0a8h,084h,088h,064h,064h,064h
+	   CC 88 44 44 84
+	   A8 84 88 64 64
+	   64
+ 0000105E  88 88 88 CC A8		BYTE 088h,088h,088h,0cch,0a8h,088h,020h,020h,040h,044h,040h,0ffh,0ffh,0ffh,0ffh,0ffh
+	   88 20 20 40 44
+	   40 FF FF FF FF
+	   FF
+ 0000106E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000107E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,000h,044h,0a8h,0a8h,0a8h,088h,0cch,0c8h,0cch,0cch,088h
+	   00 44 A8 A8 A8
+	   88 CC C8 CC CC
+	   88
+ 0000108E  88 88 64 64 84		BYTE 088h,088h,064h,064h,084h,084h,064h,064h,064h,064h,064h,088h,088h,088h,0a8h,0a8h
+	   84 64 64 64 64
+	   64 88 88 88 A8
+	   A8
+ 0000109E  88 20 20 20 20		BYTE 088h,020h,020h,020h,020h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000010AE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000010BE  FF FF 20 64 88		BYTE 0ffh,0ffh,020h,064h,088h,088h,0cch,0c8h,064h,064h,084h,0a4h,084h,064h,088h,064h
+	   88 CC C8 64 64
+	   84 A4 84 64 88
+	   64
+ 000010CE  64 64 84 64 64		BYTE 064h,064h,084h,064h,064h,064h,084h,088h,0a8h,0a8h,0a8h,088h,020h,020h,0ffh,0ffh
+	   64 84 88 A8 A8
+	   A8 88 20 20 FF
+	   FF
+ 000010DE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000010EE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,040h
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   40
+ 000010FE  64 64 88 64 64		BYTE 064h,064h,088h,064h,064h,084h,0a4h,084h,0a8h,064h,064h,044h,044h,044h,044h,044h
+	   84 A4 84 A8 64
+	   64 44 44 44 44
+	   44
+ 0000110E  64 64 84 A8 A8		BYTE 064h,064h,084h,0a8h,0a8h,0a8h,064h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   A8 64 FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000111E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000112E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,020h,020h,044h,040h,020h
+	   FF FF FF FF FF
+	   FF 20 20 44 40
+	   20
+ 0000113E  40 64 64 64 64		BYTE 040h,064h,064h,064h,064h,064h,044h,024h,020h,020h,044h,064h,068h,064h,088h,064h
+	   64 44 24 20 20
+	   44 64 68 64 88
+	   64
+ 0000114E  64 FF FF FF FF		BYTE 064h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000115E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000116E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,020h,020h,020h,020h,044h,044h,044h
+	   FF FF FF FF 20
+	   20 20 20 44 44
+	   44
+ 0000117E  44 44 20 FF 00		BYTE 044h,044h,020h,0ffh,000h,024h,044h,068h,064h,040h,064h,040h,0ffh,0ffh,0ffh,0ffh
+	   24 44 68 64 40
+	   64 40 FF FF FF
+	   FF
+ 0000118E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000119E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000011AE  FF FF FF FF 20		BYTE 0ffh,0ffh,0ffh,0ffh,020h,044h,044h,040h,044h,044h,040h,044h,044h,020h,0ffh,0ffh
+	   44 44 40 44 44
+	   40 44 44 20 FF
+	   FF
+ 000011BE  FF 24 44 44 44		BYTE 0ffh,024h,044h,044h,044h,020h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   20 FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000011CE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000011DE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000011EE  44 64 64 44 40		BYTE 044h,064h,064h,044h,040h,044h,044h,044h,044h,020h,0ffh,0ffh,0ffh,020h,024h,020h
+	   44 44 44 44 20
+	   FF FF FF 20 24
+	   20
+ 000011FE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000120E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000121E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,020h,044h,044h,040h,040h
+	   FF FF FF FF FF
+	   FF 20 44 44 40
+	   40
+ 0000122E  40 40 44 44 20		BYTE 040h,040h,044h,044h,020h,0ffh,0ffh,0ffh,000h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF 00 FF
+	   FF FF FF FF FF
+	   FF
+ 0000123E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000124E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000125E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,020h,020h,020h,040h,040h,040h,040h,020h,020h
+	   FF FF 20 20 20
+	   40 40 40 40 20
+	   20
+ 0000126E  20 20 FF FF FF		BYTE 020h,020h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000127E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000128E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000129E  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,020h,040h,044h,040h,020h,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF 20 40 44 40
+	   20 FF FF FF FF
+	   FF
+ 000012AE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000012BE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000012CE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000012DE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000012EE  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+
+
+
+
+ 000012FD 0000002C		fighter_000 EECS205BITMAP <44, 37, 255,, offset fighter_000 + sizeof fighter_000>
+	   00000025 FF
+	   00000003 [
+	    00
+	   ] 0000130D R
+ 0000130D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000131D  FF FF FF FF 49		BYTE 0ffh,0ffh,0ffh,0ffh,049h,0b6h,049h,049h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   B6 49 49 24 FF
+	   FF FF FF FF FF
+	   FF
+ 0000132D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000133D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,049h
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   49
+ 0000134D  FF E0 E0 80 80		BYTE 0ffh,0e0h,0e0h,080h,080h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   24 FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000135D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000136D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0e0h,0e0h,0e0h,080h,080h
+	   FF FF FF FF FF
+	   FF E0 E0 E0 80
+	   80
+ 0000137D  80 80 FF FF FF		BYTE 080h,080h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000138D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000139D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,049h,091h,049h,013h,049h,00ah,024h,049h,024h,0ffh
+	   FF 49 91 49 13
+	   49 0A 24 49 24
+	   FF
+ 000013AD  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000013BD  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000013CD  FF FF 49 91 49		BYTE 0ffh,0ffh,049h,091h,049h,013h,0ffh,00ah,024h,049h,024h,0ffh,0ffh,0ffh,0ffh,0ffh
+	   13 FF 0A 24 49
+	   24 FF FF FF FF
+	   FF
+ 000013DD  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000013ED  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,049h,091h
+	   FF FF FF FF FF
+	   FF FF FF FF 49
+	   91
+ 000013FD  13 13 FF 0A 0A		BYTE 013h,013h,0ffh,00ah,00ah,049h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   49 24 FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000140D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000141D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,049h,091h,013h,013h,013h,00ah
+	   FF FF FF FF FF
+	   49 91 13 13 13
+	   0A
+ 0000142D  0A 49 24 FF FF		BYTE 00ah,049h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000143D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000144D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,049h,0b6h,013h,013h,013h,00ah,00ah,091h,024h,0ffh
+	   FF 49 B6 13 13
+	   13 0A 0A 91 24
+	   FF
+ 0000145D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000146D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000147D  FF 49 91 B6 49		BYTE 0ffh,049h,091h,0b6h,049h,013h,013h,00ah,024h,091h,049h,024h,0ffh,0ffh,0ffh,0ffh
+	   13 13 0A 24 91
+	   49 24 FF FF FF
+	   FF
+ 0000148D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000149D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,049h,091h,091h
+	   FF FF FF FF FF
+	   FF FF FF 49 91
+	   91
+ 000014AD  B6 49 FF 24 91		BYTE 0b6h,049h,0ffh,024h,091h,049h,049h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   49 49 24 FF FF
+	   FF FF FF FF FF
+	   FF
+ 000014BD  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000014CD  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,049h,049h,091h,091h,0b6h,091h,091h
+	   FF FF FF FF 49
+	   49 91 91 B6 91
+	   91
+ 000014DD  49 49 24 24 FF		BYTE 049h,049h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000014ED  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000014FD  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,049h,049h,091h,091h,091h,049h,049h,049h,049h,024h,024h
+	   49 49 91 91 91
+	   49 49 49 49 24
+	   24
+ 0000150D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000151D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0e0h,0e0h,080h,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF E0 E0 80 FF
+	   FF
+ 0000152D  FF 49 91 49 49		BYTE 0ffh,049h,091h,049h,049h,091h,049h,049h,024h,024h,049h,024h,0ffh,0ffh,0ffh,080h
+	   91 49 49 24 24
+	   49 24 FF FF FF
+	   80
+ 0000153D  80 80 80 FF FF		BYTE 080h,080h,080h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000154D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0e0h,0ffh,0e0h,0e0h,080h,080h,0ffh,049h,091h,091h,0b6h
+	   E0 FF E0 E0 80
+	   80 FF 49 91 91
+	   B6
+ 0000155D  91 49 49 24 49		BYTE 091h,049h,049h,024h,049h,049h,049h,049h,024h,0ffh,0e0h,080h,080h,080h,080h,080h
+	   49 49 49 24 FF
+	   E0 80 80 80 80
+	   80
+ 0000156D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000157D  FF E0 49 49 49		BYTE 0ffh,0e0h,049h,049h,049h,024h,080h,0ffh,049h,091h,0b6h,0b6h,091h,091h,049h,049h
+	   24 80 FF 49 91
+	   B6 B6 91 91 49
+	   49
+ 0000158D  49 49 49 49 24		BYTE 049h,049h,049h,049h,024h,0ffh,0e0h,024h,024h,024h,024h,080h,0ffh,0ffh,0ffh,0ffh
+	   FF E0 24 24 24
+	   24 80 FF FF FF
+	   FF
+ 0000159D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0b6h,091h,091h
+	   FF FF FF FF FF
+	   FF FF FF B6 91
+	   91
+ 000015AD  91 49 24 49 91		BYTE 091h,049h,024h,049h,091h,091h,0b6h,091h,091h,091h,049h,049h,049h,049h,049h,049h
+	   91 B6 91 91 91
+	   49 49 49 49 49
+	   49
+ 000015BD  49 24 91 49 49		BYTE 049h,024h,091h,049h,049h,049h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   49 24 24 FF FF
+	   FF FF FF FF FF
+	   FF
+ 000015CD  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0b6h,091h,091h,091h,049h,024h,0ffh
+	   FF FF FF FF B6
+	   91 91 91 49 24
+	   FF
+ 000015DD  49 B6 91 91 91		BYTE 049h,0b6h,091h,091h,091h,091h,049h,049h,049h,049h,049h,049h,024h,0e0h,091h,049h
+	   91 49 49 49 49
+	   49 49 24 E0 91
+	   49
+ 000015ED  49 49 24 24 FF		BYTE 049h,049h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000015FD  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0b6h,091h,091h,091h,049h,024h,0e0h,0ffh,049h,049h,091h
+	   B6 91 91 91 49
+	   24 E0 FF 49 49
+	   91
+ 0000160D  91 91 49 49 49		BYTE 091h,091h,049h,049h,049h,049h,024h,024h,0e0h,080h,091h,049h,049h,049h,024h,024h
+	   49 24 24 E0 80
+	   91 49 49 49 24
+	   24
+ 0000161D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000162D  FF B6 91 91 91		BYTE 0ffh,0b6h,091h,091h,091h,049h,024h,0e0h,0e0h,049h,091h,049h,049h,049h,049h,024h
+	   49 24 E0 E0 49
+	   91 49 49 49 49
+	   24
+ 0000163D  24 24 49 24 80		BYTE 024h,024h,049h,024h,080h,080h,091h,049h,049h,049h,024h,024h,0ffh,0ffh,0ffh,0ffh
+	   80 91 49 49 49
+	   24 24 FF FF FF
+	   FF
+ 0000164D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,091h,049h,049h,049h
+	   FF FF FF FF FF
+	   FF FF 91 49 49
+	   49
+ 0000165D  49 24 24 E0 E0		BYTE 049h,024h,024h,0e0h,0e0h,0b6h,049h,0b6h,0b6h,091h,080h,049h,049h,049h,024h,049h
+	   B6 49 B6 B6 91
+	   80 49 49 49 24
+	   49
+ 0000166D  80 80 49 24 24		BYTE 080h,080h,049h,024h,024h,024h,024h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   24 24 24 24 FF
+	   FF FF FF FF FF
+	   FF
+ 0000167D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0b6h,091h,091h,091h,091h,091h,049h,024h
+	   FF FF FF B6 91
+	   91 91 91 91 49
+	   24
+ 0000168D  E0 B6 49 91 B6		BYTE 0e0h,0b6h,049h,091h,0b6h,091h,080h,049h,049h,024h,024h,049h,080h,091h,049h,049h
+	   91 80 49 49 24
+	   24 49 80 91 49
+	   49
+ 0000169D  49 49 49 24 24		BYTE 049h,049h,049h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000016AD  FF FF FF 49 B6		BYTE 0ffh,0ffh,0ffh,049h,0b6h,091h,091h,091h,091h,091h,049h,024h,0e0h,0b6h,049h,0b6h
+	   91 91 91 91 91
+	   49 24 E0 B6 49
+	   B6
+ 000016BD  91 49 80 24 24		BYTE 091h,049h,080h,024h,024h,049h,024h,049h,080h,091h,049h,049h,049h,049h,049h,024h
+	   49 24 49 80 91
+	   49 49 49 49 49
+	   24
+ 000016CD  24 24 FF FF FF		BYTE 024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,049h,049h
+	   FF FF FF FF FF
+	   FF FF FF FF 49
+	   49
+ 000016DD  B6 91 91 00 91		BYTE 0b6h,091h,091h,000h,091h,091h,049h,024h,0e0h,0b6h,091h,049h,0b6h,091h,080h,049h
+	   91 49 24 E0 B6
+	   91 49 B6 91 80
+	   49
+ 000016ED  49 24 49 49 80		BYTE 049h,024h,049h,049h,080h,091h,049h,049h,000h,049h,049h,024h,024h,024h,024h,0ffh
+	   91 49 49 00 49
+	   49 24 24 24 24
+	   FF
+ 000016FD  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,091h,091h,049h,0b6h,091h,000h,0fch
+	   FF FF FF FF 91
+	   91 49 B6 91 00
+	   FC
+ 0000170D  00 91 49 24 E0		BYTE 000h,091h,049h,024h,0e0h,0b6h,091h,049h,091h,091h,080h,049h,024h,024h,049h,049h
+	   B6 91 49 91 91
+	   80 49 24 24 49
+	   49
+ 0000171D  80 91 49 00 90		BYTE 080h,091h,049h,000h,090h,000h,049h,024h,024h,024h,049h,024h,0ffh,0ffh,0ffh,0ffh
+	   00 49 24 24 24
+	   49 24 FF FF FF
+	   FF
+ 0000172D  FF FF FF FF 91		BYTE 0ffh,0ffh,0ffh,0ffh,091h,0b6h,091h,049h,0b6h,000h,0fch,000h,0fch,000h,049h,024h
+	   B6 91 49 B6 00
+	   FC 00 FC 00 49
+	   24
+ 0000173D  E0 B6 91 49 B6		BYTE 0e0h,0b6h,091h,049h,0b6h,049h,080h,024h,049h,024h,049h,049h,080h,091h,000h,090h
+	   49 80 24 49 24
+	   49 49 80 91 00
+	   90
+ 0000174D  00 90 00 24 24		BYTE 000h,090h,000h,024h,024h,024h,049h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   24 49 24 FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000175D  B6 91 49 E0 B6		BYTE 0b6h,091h,049h,0e0h,0b6h,000h,000h,000h,000h,000h,049h,024h,080h,0b6h,091h,091h
+	   00 00 00 00 00
+	   49 24 80 B6 91
+	   91
+ 0000176D  49 91 80 49 24		BYTE 049h,091h,080h,049h,024h,049h,049h,049h,080h,091h,000h,000h,000h,000h,000h,024h
+	   49 49 49 80 91
+	   00 00 00 00 00
+	   24
+ 0000177D  24 24 49 49 24		BYTE 024h,024h,049h,049h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,091h,091h,0e0h,0e0h,080h
+	   FF FF FF FF FF
+	   FF 91 91 E0 E0
+	   80
+ 0000178D  B6 91 91 91 91		BYTE 0b6h,091h,091h,091h,091h,091h,049h,024h,080h,0b6h,091h,0b6h,091h,049h,080h,024h
+	   91 49 24 80 B6
+	   91 B6 91 49 80
+	   24
+ 0000179D  49 49 49 49 80		BYTE 049h,049h,049h,049h,080h,091h,049h,049h,049h,049h,049h,024h,024h,080h,080h,080h
+	   91 49 49 49 49
+	   49 24 24 80 80
+	   80
+ 000017AD  49 24 FF FF FF		BYTE 049h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0e0h,080h,080h,0ffh,0ffh,049h,049h,049h
+	   FF FF FF E0 80
+	   80 FF FF 49 49
+	   49
+ 000017BD  49 49 24 E3 B6		BYTE 049h,049h,024h,0e3h,0b6h,0b6h,091h,091h,0b6h,091h,024h,049h,049h,049h,049h,049h
+	   B6 91 91 B6 91
+	   24 49 49 49 49
+	   49
+ 000017CD  24 E3 24 24 24		BYTE 024h,0e3h,024h,024h,024h,024h,024h,024h,0ffh,0ffh,080h,080h,080h,080h,0ffh,0ffh
+	   24 24 24 FF FF
+	   80 80 80 80 FF
+	   FF
+ 000017DD  FF FF FF E0 80		BYTE 0ffh,0ffh,0ffh,0e0h,080h,0ffh,0ffh,0ffh,0e0h,0ffh,0e0h,0e0h,0e0h,0e0h,080h,080h
+	   FF FF FF E0 FF
+	   E0 E0 E0 E0 80
+	   80
+ 000017ED  FF B6 49 49 49		BYTE 0ffh,0b6h,049h,049h,049h,0b6h,091h,024h,024h,024h,024h,024h,0ffh,0e0h,0e0h,080h
+	   B6 91 24 24 24
+	   24 24 FF E0 E0
+	   80
+ 000017FD  80 80 80 80 80		BYTE 080h,080h,080h,080h,080h,0ffh,0ffh,0ffh,080h,080h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF 80 80
+	   FF FF FF FF FF
+	   FF
+ 0000180D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0e0h,0e0h,0e0h,0e0h,080h,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF E0 E0 E0 E0
+	   80 FF FF FF FF
+	   FF
+ 0000181D  FF B6 91 24 FF		BYTE 0ffh,0b6h,091h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0e0h,080h,080h,080h,080h,080h
+	   FF FF FF FF FF
+	   E0 80 80 80 80
+	   80
+ 0000182D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000183D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0b6h,091h,024h
+	   FF FF FF FF FF
+	   FF FF FF B6 91
+	   24
+ 0000184D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000185D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000186D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0b6h,091h,024h,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF B6
+	   91 24 FF FF FF
+	   FF
+ 0000187D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000188D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000189D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0b6h,091h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   B6 91 24 FF FF
+	   FF FF FF FF FF
+	   FF
+ 000018AD  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000018BD  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000018CD  FF E0 24 80 FF		BYTE 0ffh,0e0h,024h,080h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000018DD  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000018ED  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,080h,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF 80
+	   FF
+ 000018FD  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000190D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000191D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000192D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000193D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000194D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 0000195D  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF
+					
+					
+ 00001969 00000038			asteroid_000 EECS205BITMAP <56, 53, 255,, offset asteroid_000 + sizeof asteroid_000>
+	   00000035 FF
+	   00000003 [
+	    00
+	   ] 00001979 R
+ 00001979  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00001989  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00001999  24 24 24 FF FF		BYTE 024h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000019A9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000019B9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000019C9  FF FF FF 24 24		BYTE 0ffh,0ffh,0ffh,024h,024h,024h,024h,024h,049h,024h,024h,024h,0ffh,0ffh,0ffh,0ffh
+	   24 24 24 49 24
+	   24 24 FF FF FF
+	   FF
+ 000019D9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000019E9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000019F9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,024h,024h,024h,024h,049h,049h,049h,049h,024h
+	   FF FF 24 24 24
+	   24 49 49 49 49
+	   24
+ 00001A09  24 24 24 24 24		BYTE 024h,024h,024h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00001A19  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00001A29  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,024h,024h,024h,024h,049h
+	   FF FF FF FF FF
+	   FF 24 24 24 24
+	   49
+ 00001A39  49 49 49 49 24		BYTE 049h,049h,049h,049h,024h,024h,024h,024h,024h,024h,024h,024h,024h,0ffh,0ffh,0ffh
+	   24 24 24 24 24
+	   24 24 24 FF FF
+	   FF
+ 00001A49  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00001A59  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00001A69  FF 49 49 49 49		BYTE 0ffh,049h,049h,049h,049h,049h,049h,049h,049h,049h,024h,024h,024h,024h,024h,024h
+	   49 49 49 49 49
+	   24 24 24 24 24
+	   24
+ 00001A79  24 24 24 24 24		BYTE 024h,024h,024h,024h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   24 FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00001A89  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00001A99  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,049h,049h,091h,091h,049h,049h,049h,049h,049h
+	   FF FF 49 49 91
+	   91 49 49 49 49
+	   49
+ 00001AA9  49 49 24 24 24		BYTE 049h,049h,024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,0ffh
+	   24 24 24 24 24
+	   24 24 24 24 24
+	   FF
+ 00001AB9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00001AC9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,049h,049h,049h,091h
+	   FF FF FF FF FF
+	   FF FF 49 49 49
+	   91
+ 00001AD9  91 49 49 49 49		BYTE 091h,049h,049h,049h,049h,049h,024h,024h,024h,049h,049h,024h,024h,024h,024h,024h
+	   49 24 24 24 49
+	   49 24 24 24 24
+	   24
+ 00001AE9  24 49 49 24 24		BYTE 024h,049h,049h,024h,024h,024h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   24 24 24 FF FF
+	   FF FF FF FF FF
+	   FF
+ 00001AF9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00001B09  FF FF 49 49 91		BYTE 0ffh,0ffh,049h,049h,091h,091h,091h,091h,049h,049h,049h,049h,049h,049h,024h,024h
+	   91 91 91 49 49
+	   49 49 49 49 24
+	   24
+ 00001B19  24 24 49 49 49		BYTE 024h,024h,049h,049h,049h,024h,024h,024h,000h,024h,049h,024h,024h,024h,024h,024h
+	   24 24 24 00 24
+	   49 24 24 24 24
+	   24
+ 00001B29  24 FF FF FF FF		BYTE 024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00001B39  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,049h,049h,091h,091h,091h,091h,049h,091h
+	   FF FF FF 49 49
+	   91 91 91 91 49
+	   91
+ 00001B49  49 49 49 49 49		BYTE 049h,049h,049h,049h,049h,024h,024h,024h,024h,024h,024h,049h,049h,024h,024h,024h
+	   24 24 24 24 24
+	   24 49 49 24 24
+	   24
+ 00001B59  24 00 24 24 24		BYTE 024h,000h,024h,024h,024h,024h,024h,024h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   24 24 24 24 24
+	   FF FF FF FF FF
+	   FF
+ 00001B69  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,049h,049h
+	   FF FF FF FF FF
+	   FF FF FF FF 49
+	   49
+ 00001B79  91 91 91 91 91		BYTE 091h,091h,091h,091h,091h,049h,024h,049h,091h,049h,049h,049h,049h,024h,024h,024h
+	   49 24 49 91 49
+	   49 49 49 24 24
+	   24
+ 00001B89  24 24 24 49 49		BYTE 024h,024h,024h,049h,049h,049h,024h,024h,024h,024h,024h,024h,024h,049h,024h,024h
+	   49 24 24 24 24
+	   24 24 24 49 24
+	   24
+ 00001B99  24 24 FF FF FF		BYTE 024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00001BA9  FF FF FF FF 91		BYTE 0ffh,0ffh,0ffh,0ffh,091h,049h,091h,091h,0b6h,091h,091h,049h,049h,049h,024h,024h
+	   49 91 91 B6 91
+	   91 49 49 49 24
+	   24
+ 00001BB9  49 49 49 49 49		BYTE 049h,049h,049h,049h,049h,024h,024h,024h,024h,024h,024h,024h,049h,049h,049h,049h
+	   24 24 24 24 24
+	   24 24 49 49 49
+	   49
+ 00001BC9  24 24 49 49 24		BYTE 024h,024h,049h,049h,024h,024h,024h,024h,024h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh
+	   24 24 24 24 24
+	   24 FF FF FF FF
+	   FF
+ 00001BD9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,091h,0b6h,0b6h,0b6h
+	   FF FF FF FF FF
+	   FF FF 91 B6 B6
+	   B6
+ 00001BE9  91 91 49 49 49		BYTE 091h,091h,049h,049h,049h,049h,049h,049h,049h,091h,091h,049h,049h,024h,024h,024h
+	   49 49 49 49 91
+	   91 49 49 24 24
+	   24
+ 00001BF9  24 24 24 24 24		BYTE 024h,024h,024h,024h,024h,049h,049h,049h,049h,049h,049h,024h,024h,024h,024h,024h
+	   49 49 49 49 49
+	   49 24 24 24 24
+	   24
+ 00001C09  24 24 24 24 24		BYTE 024h,024h,024h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00001C19  FF FF FF 91 B6		BYTE 0ffh,0ffh,0ffh,091h,0b6h,0b6h,0b6h,0b6h,091h,049h,049h,049h,049h,049h,049h,049h
+	   B6 B6 B6 91 49
+	   49 49 49 49 49
+	   49
+ 00001C29  91 91 91 91 49		BYTE 091h,091h,091h,091h,049h,049h,024h,024h,024h,024h,024h,024h,024h,024h,049h,049h
+	   49 24 24 24 24
+	   24 24 24 24 49
+	   49
+ 00001C39  49 24 24 24 24		BYTE 049h,024h,024h,024h,024h,024h,024h,049h,049h,049h,024h,024h,024h,024h,024h,024h
+	   24 24 49 49 49
+	   24 24 24 24 24
+	   24
+ 00001C49  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,091h,0b6h,0b6h,0b6h,0b6h
+	   FF FF FF FF FF
+	   FF 91 B6 B6 B6
+	   B6
+ 00001C59  91 49 49 49 49		BYTE 091h,049h,049h,049h,049h,049h,049h,049h,049h,091h,091h,091h,049h,049h,049h,024h
+	   49 49 49 49 91
+	   91 91 49 49 49
+	   24
+ 00001C69  24 24 24 24 24		BYTE 024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,049h,049h,049h
+	   24 24 24 24 24
+	   24 24 24 49 49
+	   49
+ 00001C79  24 24 49 24 24		BYTE 024h,024h,049h,024h,024h,024h,024h,024h,024h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh
+	   24 24 24 24 24
+	   24 FF FF FF FF
+	   FF
+ 00001C89  FF FF 91 B6 B6		BYTE 0ffh,0ffh,091h,0b6h,0b6h,091h,0b6h,0b6h,091h,049h,049h,049h,049h,049h,049h,049h
+	   91 B6 B6 91 49
+	   49 49 49 49 49
+	   49
+ 00001C99  49 91 91 91 91		BYTE 049h,091h,091h,091h,091h,049h,049h,049h,024h,024h,024h,024h,024h,024h,024h,024h
+	   49 49 49 24 24
+	   24 24 24 24 24
+	   24
+ 00001CA9  24 24 24 24 24		BYTE 024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,049h,024h
+	   24 24 24 24 24
+	   24 24 24 24 49
+	   24
+ 00001CB9  24 24 24 24 24		BYTE 024h,024h,024h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,091h,0b6h,0b6h,091h,091h,0b6h
+	   FF FF FF FF FF
+	   91 B6 B6 91 91
+	   B6
+ 00001CC9  91 91 91 91 49		BYTE 091h,091h,091h,091h,049h,049h,049h,049h,049h,049h,091h,091h,091h,091h,049h,049h
+	   49 49 49 49 49
+	   91 91 91 91 49
+	   49
+ 00001CD9  49 49 24 24 24		BYTE 049h,049h,024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,024h
+	   24 24 24 24 24
+	   24 24 24 24 24
+	   24
+ 00001CE9  24 24 24 24 24		BYTE 024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,0ffh,0ffh,0ffh
+	   24 24 24 24 24
+	   24 24 24 FF FF
+	   FF
+ 00001CF9  FF FF 91 B6 91		BYTE 0ffh,0ffh,091h,0b6h,091h,091h,091h,091h,0b6h,091h,091h,091h,091h,091h,091h,091h
+	   91 91 91 B6 91
+	   91 91 91 91 91
+	   91
+ 00001D09  91 49 49 91 91		BYTE 091h,049h,049h,091h,091h,091h,091h,049h,049h,049h,049h,024h,024h,024h,024h,024h
+	   91 91 49 49 49
+	   49 24 24 24 24
+	   24
+ 00001D19  24 24 24 24 24		BYTE 024h,024h,024h,024h,024h,049h,049h,049h,024h,024h,024h,024h,024h,024h,024h,024h
+	   49 49 49 24 24
+	   24 24 24 24 24
+	   24
+ 00001D29  24 49 49 24 24		BYTE 024h,049h,049h,024h,024h,0ffh,0ffh,0ffh,0ffh,091h,0b6h,0b6h,091h,091h,091h,091h
+	   FF FF FF FF 91
+	   B6 B6 91 91 91
+	   91
+ 00001D39  91 91 91 91 B6		BYTE 091h,091h,091h,091h,0b6h,0b6h,091h,091h,091h,091h,049h,049h,049h,091h,091h,049h
+	   B6 91 91 91 91
+	   49 49 49 91 91
+	   49
+ 00001D49  49 49 49 49 24		BYTE 049h,049h,049h,049h,024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,049h,049h
+	   24 24 24 24 24
+	   24 24 24 24 49
+	   49
+ 00001D59  49 24 24 24 24		BYTE 049h,024h,024h,024h,024h,049h,024h,024h,024h,024h,049h,049h,024h,024h,0ffh,0ffh
+	   49 24 24 24 24
+	   49 49 24 24 FF
+	   FF
+ 00001D69  FF 91 B6 B6 91		BYTE 0ffh,091h,0b6h,0b6h,091h,091h,091h,091h,091h,091h,091h,049h,091h,0b6h,091h,091h
+	   91 91 91 91 91
+	   91 49 91 B6 91
+	   91
+ 00001D79  91 91 91 49 49		BYTE 091h,091h,091h,049h,049h,049h,091h,049h,049h,049h,049h,049h,024h,024h,024h,024h
+	   49 91 49 49 49
+	   49 49 24 24 24
+	   24
+ 00001D89  24 49 49 49 49		BYTE 024h,049h,049h,049h,049h,049h,049h,049h,049h,049h,049h,024h,024h,049h,024h,024h
+	   49 49 49 49 49
+	   49 24 24 49 24
+	   24
+ 00001D99  24 24 49 49 24		BYTE 024h,024h,049h,049h,024h,024h,0ffh,0ffh,091h,0b6h,0b6h,0b6h,091h,091h,091h,091h
+	   24 FF FF 91 B6
+	   B6 B6 91 91 91
+	   91
+ 00001DA9  91 91 91 91 49		BYTE 091h,091h,091h,091h,049h,091h,091h,0b6h,0b6h,091h,091h,049h,049h,049h,091h,091h
+	   91 91 B6 B6 91
+	   91 49 49 49 91
+	   91
+ 00001DB9  49 49 49 49 24		BYTE 049h,049h,049h,049h,024h,024h,024h,024h,049h,049h,049h,049h,049h,049h,049h,091h
+	   24 24 24 49 49
+	   49 49 49 49 49
+	   91
+ 00001DC9  91 49 49 49 24		BYTE 091h,049h,049h,049h,024h,024h,049h,024h,024h,024h,024h,049h,024h,024h,0ffh,0ffh
+	   24 49 24 24 24
+	   24 49 24 24 FF
+	   FF
+ 00001DD9  91 B6 B6 B6 91		BYTE 091h,0b6h,0b6h,0b6h,091h,091h,091h,091h,091h,091h,0b6h,091h,091h,091h,091h,091h
+	   91 91 91 91 91
+	   B6 91 91 91 91
+	   91
+ 00001DE9  B6 B6 91 91 91		BYTE 0b6h,0b6h,091h,091h,091h,091h,091h,091h,091h,049h,049h,049h,024h,024h,024h,024h
+	   91 91 91 91 49
+	   49 49 24 24 24
+	   24
+ 00001DF9  49 49 49 49 49		BYTE 049h,049h,049h,049h,049h,049h,024h,024h,091h,091h,049h,049h,024h,024h,049h,049h
+	   49 24 24 91 91
+	   49 49 24 24 49
+	   49
+ 00001E09  24 24 24 49 49		BYTE 024h,024h,024h,049h,049h,024h,0ffh,0ffh,091h,0b6h,0b6h,0b6h,091h,091h,091h,0b6h
+	   24 FF FF 91 B6
+	   B6 B6 91 91 91
+	   B6
+ 00001E19  B6 91 91 91 91		BYTE 0b6h,091h,091h,091h,091h,091h,091h,091h,091h,091h,091h,091h,0b6h,091h,091h,091h
+	   91 91 91 91 91
+	   91 91 B6 91 91
+	   91
+ 00001E29  91 91 91 49 49		BYTE 091h,091h,091h,049h,049h,024h,024h,024h,024h,049h,049h,049h,049h,024h,049h,049h
+	   24 24 24 24 49
+	   49 49 49 24 49
+	   49
+ 00001E39  49 91 91 49 49		BYTE 049h,091h,091h,049h,049h,024h,049h,049h,024h,024h,024h,024h,049h,024h,0ffh,0ffh
+	   24 49 49 24 24
+	   24 24 49 24 FF
+	   FF
+ 00001E49  FF 91 B6 B6 B6		BYTE 0ffh,091h,0b6h,0b6h,0b6h,091h,0b6h,0b6h,0b6h,091h,091h,049h,091h,091h,091h,091h
+	   91 B6 B6 B6 91
+	   91 49 91 91 91
+	   91
+ 00001E59  91 91 91 B6 91		BYTE 091h,091h,091h,0b6h,091h,091h,091h,049h,091h,091h,049h,049h,049h,024h,024h,024h
+	   91 91 49 91 91
+	   49 49 49 24 24
+	   24
+ 00001E69  24 49 49 49 49		BYTE 024h,049h,049h,049h,049h,024h,024h,049h,049h,049h,091h,049h,049h,024h,049h,049h
+	   24 24 49 49 49
+	   91 49 49 24 49
+	   49
+ 00001E79  49 24 24 24 24		BYTE 049h,024h,024h,024h,024h,024h,0ffh,0ffh,0ffh,091h,0b6h,0b6h,0b6h,091h,0b6h,0b6h
+	   24 FF FF FF 91
+	   B6 B6 B6 91 B6
+	   B6
+ 00001E89  91 B6 B6 91 49		BYTE 091h,0b6h,0b6h,091h,049h,091h,091h,091h,091h,091h,0b6h,0b6h,091h,091h,091h,049h
+	   91 91 91 91 91
+	   B6 B6 91 91 91
+	   49
+ 00001E99  91 91 91 49 49		BYTE 091h,091h,091h,049h,049h,049h,024h,024h,024h,049h,049h,049h,049h,024h,024h,024h
+	   49 24 24 24 49
+	   49 49 49 24 24
+	   24
+ 00001EA9  49 24 24 49 49		BYTE 049h,024h,024h,049h,049h,049h,049h,049h,049h,049h,024h,024h,024h,024h,024h,0ffh
+	   49 49 49 49 49
+	   24 24 24 24 24
+	   FF
+ 00001EB9  FF 91 B6 B6 B6		BYTE 0ffh,091h,0b6h,0b6h,0b6h,091h,0b6h,091h,049h,091h,0b6h,0b6h,091h,091h,091h,091h
+	   91 B6 91 49 91
+	   B6 B6 91 91 91
+	   91
+ 00001EC9  91 91 91 B6 91		BYTE 091h,091h,091h,0b6h,091h,091h,091h,049h,091h,091h,091h,091h,049h,049h,024h,024h
+	   91 91 49 91 91
+	   91 91 49 49 24
+	   24
+ 00001ED9  49 49 49 49 49		BYTE 049h,049h,049h,049h,049h,049h,049h,024h,024h,024h,049h,049h,049h,049h,049h,049h
+	   49 49 24 24 24
+	   49 49 49 49 49
+	   49
+ 00001EE9  49 49 24 24 24		BYTE 049h,049h,024h,024h,024h,024h,024h,0ffh,0ffh,0ffh,091h,0b6h,0b6h,091h,0b6h,091h
+	   24 24 FF FF FF
+	   91 B6 B6 91 B6
+	   91
+ 00001EF9  49 91 91 B6 91		BYTE 049h,091h,091h,0b6h,091h,091h,091h,091h,091h,091h,0b6h,0b6h,0b6h,091h,091h,049h
+	   91 91 91 91 91
+	   B6 B6 B6 91 91
+	   49
+ 00001F09  49 91 91 91 49		BYTE 049h,091h,091h,091h,049h,049h,024h,024h,049h,049h,049h,049h,024h,049h,049h,049h
+	   49 24 24 49 49
+	   49 49 24 49 49
+	   49
+ 00001F19  49 49 49 49 49		BYTE 049h,049h,049h,049h,049h,049h,049h,049h,049h,024h,024h,024h,024h,024h,024h,0ffh
+	   49 49 49 49 24
+	   24 24 24 24 24
+	   FF
+ 00001F29  FF FF 91 B6 B6		BYTE 0ffh,0ffh,091h,0b6h,0b6h,0b6h,0b6h,091h,049h,049h,091h,0b6h,091h,091h,091h,091h
+	   B6 B6 91 49 49
+	   91 B6 91 91 91
+	   91
+ 00001F39  91 91 91 B6 B6		BYTE 091h,091h,091h,0b6h,0b6h,091h,091h,091h,049h,049h,049h,049h,049h,024h,024h,049h
+	   91 91 91 49 49
+	   49 49 49 24 24
+	   49
+ 00001F49  49 49 49 49 24		BYTE 049h,049h,049h,049h,024h,024h,049h,049h,049h,049h,049h,049h,049h,049h,049h,049h
+	   24 49 49 49 49
+	   49 49 49 49 49
+	   49
+ 00001F59  24 24 24 24 24		BYTE 024h,024h,024h,024h,024h,024h,0ffh,0ffh,0ffh,0ffh,091h,0b6h,0b6h,0b6h,0b6h,0b6h
+	   24 FF FF FF FF
+	   91 B6 B6 B6 B6
+	   B6
+ 00001F69  91 49 49 91 91		BYTE 091h,049h,049h,091h,091h,091h,091h,091h,091h,091h,091h,0b6h,0b6h,091h,091h,049h
+	   91 91 91 91 91
+	   91 B6 B6 91 91
+	   49
+ 00001F79  49 49 49 91 49		BYTE 049h,049h,049h,091h,049h,049h,049h,049h,049h,049h,049h,049h,024h,024h,024h,049h
+	   49 49 49 49 49
+	   49 49 24 24 24
+	   49
+ 00001F89  49 49 49 49 24		BYTE 049h,049h,049h,049h,024h,024h,024h,024h,024h,024h,024h,024h,024h,0ffh,0ffh,0ffh
+	   24 24 24 24 24
+	   24 24 24 FF FF
+	   FF
+ 00001F99  FF FF FF 91 B6		BYTE 0ffh,0ffh,0ffh,091h,0b6h,0b6h,0b6h,0b6h,091h,091h,091h,091h,091h,091h,091h,091h
+	   B6 B6 B6 91 91
+	   91 91 91 91 91
+	   91
+ 00001FA9  91 91 91 91 B6		BYTE 091h,091h,091h,091h,0b6h,0b6h,091h,049h,049h,049h,049h,049h,049h,049h,049h,049h
+	   B6 91 49 49 49
+	   49 49 49 49 49
+	   49
+ 00001FB9  24 24 24 49 24		BYTE 024h,024h,024h,049h,024h,024h,024h,049h,049h,024h,024h,024h,024h,024h,024h,024h
+	   24 24 49 49 24
+	   24 24 24 24 24
+	   24
+ 00001FC9  24 49 24 24 FF		BYTE 024h,049h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,091h,091h,0b6h,0b6h,0b6h
+	   FF FF FF FF FF
+	   FF 91 91 B6 B6
+	   B6
+ 00001FD9  B6 91 91 91 91		BYTE 0b6h,091h,091h,091h,091h,091h,091h,091h,091h,091h,091h,091h,0b6h,0b6h,091h,049h
+	   91 91 91 91 91
+	   91 91 B6 B6 91
+	   49
+ 00001FE9  49 49 49 49 49		BYTE 049h,049h,049h,049h,049h,049h,049h,049h,049h,024h,024h,024h,024h,024h,024h,049h
+	   49 49 49 49 24
+	   24 24 24 24 24
+	   49
+ 00001FF9  24 24 24 24 24		BYTE 024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh
+	   24 24 24 24 24
+	   24 FF FF FF FF
+	   FF
+ 00002009  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,091h,0b6h,0b6h,0b6h,091h,091h,091h,091h,091h,091h,091h
+	   91 B6 B6 B6 91
+	   91 91 91 91 91
+	   91
+ 00002019  91 91 91 91 91		BYTE 091h,091h,091h,091h,091h,0b6h,091h,049h,049h,049h,049h,049h,049h,049h,091h,091h
+	   B6 91 49 49 49
+	   49 49 49 49 91
+	   91
+ 00002029  49 49 24 24 24		BYTE 049h,049h,024h,024h,024h,024h,049h,049h,024h,024h,024h,024h,049h,049h,024h,024h
+	   24 49 49 24 24
+	   24 24 49 49 24
+	   24
+ 00002039  24 24 FF FF FF		BYTE 024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,091h,0b6h
+	   FF FF FF FF FF
+	   FF FF FF FF 91
+	   B6
+ 00002049  B6 B6 91 91 91		BYTE 0b6h,0b6h,091h,091h,091h,091h,091h,091h,091h,091h,091h,091h,091h,091h,091h,049h
+	   91 91 91 91 91
+	   91 91 91 91 91
+	   49
+ 00002059  49 49 49 91 49		BYTE 049h,049h,049h,091h,049h,024h,049h,091h,049h,049h,024h,024h,024h,024h,049h,024h
+	   24 49 91 49 49
+	   24 24 24 24 49
+	   24
+ 00002069  24 24 49 49 49		BYTE 024h,024h,049h,049h,049h,024h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   24 24 24 FF FF
+	   FF FF FF FF FF
+	   FF
+ 00002079  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,091h,0b6h,0b6h,0b6h,0b6h,091h,091h,0b6h,0b6h,091h
+	   FF 91 B6 B6 B6
+	   B6 91 91 B6 B6
+	   91
+ 00002089  B6 91 91 91 91		BYTE 0b6h,091h,091h,091h,091h,091h,091h,049h,049h,049h,049h,091h,049h,024h,049h,091h
+	   91 91 49 49 49
+	   49 91 49 24 49
+	   91
+ 00002099  49 49 24 24 24		BYTE 049h,049h,024h,024h,024h,049h,024h,024h,024h,024h,049h,049h,024h,024h,024h,0ffh
+	   49 24 24 24 24
+	   49 49 24 24 24
+	   FF
+ 000020A9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,091h
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   91
+ 000020B9  B6 B6 B6 B6 B6		BYTE 0b6h,0b6h,0b6h,0b6h,0b6h,0b6h,091h,091h,091h,091h,091h,091h,091h,091h,091h,091h
+	   B6 91 91 91 91
+	   91 91 91 91 91
+	   91
+ 000020C9  49 49 49 91 91		BYTE 049h,049h,049h,091h,091h,049h,024h,049h,049h,049h,024h,024h,049h,024h,024h,024h
+	   49 24 49 49 49
+	   24 24 49 24 24
+	   24
+ 000020D9  24 24 49 49 24		BYTE 024h,024h,049h,049h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   24 FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000020E9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,091h,0b6h,0b6h,0b6h,0b6h,091h,091h,091h
+	   FF FF FF 91 B6
+	   B6 B6 B6 91 91
+	   91
+ 000020F9  91 91 91 91 91		BYTE 091h,091h,091h,091h,091h,091h,091h,091h,049h,049h,049h,091h,091h,091h,049h,049h
+	   91 91 91 49 49
+	   49 91 91 91 49
+	   49
+ 00002109  49 49 24 49 49		BYTE 049h,049h,024h,049h,049h,024h,024h,024h,024h,049h,024h,024h,024h,0ffh,0ffh,0ffh
+	   24 24 24 24 49
+	   24 24 24 FF FF
+	   FF
+ 00002119  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00002129  FF 91 B6 B6 B6		BYTE 0ffh,091h,0b6h,0b6h,0b6h,091h,091h,091h,0b6h,0b6h,091h,091h,091h,0b6h,091h,091h
+	   91 91 91 B6 B6
+	   91 91 91 B6 91
+	   91
+ 00002139  91 91 49 49 91		BYTE 091h,091h,049h,049h,091h,091h,091h,049h,049h,049h,049h,049h,024h,024h,024h,024h
+	   91 91 49 49 49
+	   49 49 24 24 24
+	   24
+ 00002149  24 24 24 24 FF		BYTE 024h,024h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00002159  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,091h,0b6h,0b6h,0b6h,0b6h,091h,049h
+	   FF FF FF FF 91
+	   B6 B6 B6 B6 91
+	   49
+ 00002169  91 B6 91 91 91		BYTE 091h,0b6h,091h,091h,091h,091h,091h,091h,091h,091h,091h,049h,049h,091h,049h,049h
+	   91 91 91 91 91
+	   91 49 49 91 49
+	   49
+ 00002179  49 49 49 49 24		BYTE 049h,049h,049h,049h,024h,024h,024h,024h,024h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh
+	   24 24 24 24 24
+	   24 FF FF FF FF
+	   FF
+ 00002189  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00002199  FF FF 91 B6 B6		BYTE 0ffh,0ffh,091h,0b6h,0b6h,0b6h,091h,049h,049h,091h,091h,091h,091h,091h,091h,091h
+	   B6 91 49 49 91
+	   91 91 91 91 91
+	   91
+ 000021A9  91 91 91 91 91		BYTE 091h,091h,091h,091h,091h,091h,049h,049h,049h,024h,049h,049h,049h,024h,024h,024h
+	   91 49 49 49 24
+	   49 49 49 24 24
+	   24
+ 000021B9  24 24 24 FF FF		BYTE 024h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000021C9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,091h,0b6h,0b6h,0b6h,091h
+	   FF FF FF FF FF
+	   FF 91 B6 B6 B6
+	   91
+ 000021D9  91 91 91 91 91		BYTE 091h,091h,091h,091h,091h,091h,0b6h,091h,091h,091h,091h,091h,091h,049h,049h,049h
+	   91 B6 91 91 91
+	   91 91 91 49 49
+	   49
+ 000021E9  49 49 49 49 49		BYTE 049h,049h,049h,049h,049h,024h,024h,024h,024h,024h,024h,0ffh,0ffh,0ffh,0ffh,0ffh
+	   24 24 24 24 24
+	   24 FF FF FF FF
+	   FF
+ 000021F9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00002209  FF FF FF 91 91		BYTE 0ffh,0ffh,0ffh,091h,091h,0b6h,0b6h,0b6h,0b6h,0b6h,0b6h,091h,091h,0b6h,0b6h,091h
+	   B6 B6 B6 B6 B6
+	   B6 91 91 B6 B6
+	   91
+ 00002219  91 91 91 91 91		BYTE 091h,091h,091h,091h,091h,049h,049h,049h,049h,049h,049h,049h,049h,049h,024h,024h
+	   49 49 49 49 49
+	   49 49 49 49 24
+	   24
+ 00002229  24 49 24 FF FF		BYTE 024h,049h,024h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00002239  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,091h,091h,091h
+	   FF FF FF FF FF
+	   FF FF FF 91 91
+	   91
+ 00002249  91 B6 B6 B6 B6		BYTE 091h,0b6h,0b6h,0b6h,0b6h,0b6h,0b6h,0b6h,091h,091h,091h,091h,091h,049h,049h,049h
+	   B6 B6 B6 91 91
+	   91 91 91 49 49
+	   49
+ 00002259  49 49 91 91 91		BYTE 049h,049h,091h,091h,091h,049h,024h,024h,024h,049h,024h,0ffh,0ffh,0ffh,0ffh,0ffh
+	   49 24 24 24 49
+	   24 FF FF FF FF
+	   FF
+ 00002269  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00002279  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,091h,091h,091h,0b6h,0b6h,0b6h,0b6h
+	   FF FF FF FF 91
+	   91 91 B6 B6 B6
+	   B6
+ 00002289  B6 91 91 91 91		BYTE 0b6h,091h,091h,091h,091h,049h,049h,049h,024h,091h,091h,091h,091h,091h,049h,024h
+	   49 49 49 24 91
+	   91 91 91 91 49
+	   24
+ 00002299  49 91 49 FF FF		BYTE 049h,091h,049h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000022A9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000022B9  FF FF FF FF 91		BYTE 0ffh,0ffh,0ffh,0ffh,091h,091h,0b6h,0b6h,0b6h,0b6h,091h,091h,091h,091h,049h,024h
+	   91 B6 B6 B6 B6
+	   91 91 91 91 49
+	   24
+ 000022C9  49 49 49 49 91		BYTE 049h,049h,049h,049h,091h,091h,091h,049h,091h,049h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   91 91 49 91 49
+	   FF FF FF FF FF
+	   FF
+ 000022D9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000022E9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,091h,0b6h
+	   FF FF FF FF FF
+	   FF FF FF FF 91
+	   B6
+ 000022F9  B6 B6 91 91 91		BYTE 0b6h,0b6h,091h,091h,091h,091h,091h,024h,049h,049h,049h,049h,049h,049h,091h,091h
+	   91 91 24 49 49
+	   49 49 49 49 91
+	   91
+ 00002309  91 49 FF FF FF		BYTE 091h,049h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00002319  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00002329  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,091h,0b6h,0b6h,0b6h,091h,091h,0b6h,091h,024h
+	   FF FF 91 B6 B6
+	   B6 91 91 B6 91
+	   24
+ 00002339  24 49 49 49 49		BYTE 024h,049h,049h,049h,049h,049h,091h,091h,091h,049h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   49 91 91 91 49
+	   FF FF FF FF FF
+	   FF
+ 00002349  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00002359  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00002369  91 B6 B6 B6 91		BYTE 091h,0b6h,0b6h,0b6h,091h,091h,091h,091h,024h,024h,024h,049h,049h,049h,091h,091h
+	   91 91 91 24 24
+	   24 49 49 49 91
+	   91
+ 00002379  91 49 FF FF FF		BYTE 091h,049h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00002389  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00002399  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,091h,0b6h,0b6h,0b6h,091h,0b6h,091h
+	   FF FF FF FF 91
+	   B6 B6 B6 91 B6
+	   91
+ 000023A9  91 91 24 24 49		BYTE 091h,091h,024h,024h,049h,049h,024h,091h,091h,049h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   49 24 91 91 49
+	   FF FF FF FF FF
+	   FF
+ 000023B9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000023C9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000023D9  FF FF 91 B6 B6		BYTE 0ffh,0ffh,091h,0b6h,0b6h,0b6h,0b6h,0b6h,091h,091h,091h,024h,024h,024h,091h,091h
+	   B6 B6 B6 91 91
+	   91 24 24 24 91
+	   91
+ 000023E9  91 49 FF FF FF		BYTE 091h,049h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000023F9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00002409  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,091h,0b6h,0b6h,0b6h,0b6h
+	   FF FF FF FF FF
+	   FF 91 B6 B6 B6
+	   B6
+ 00002419  B6 B6 91 91 91		BYTE 0b6h,0b6h,091h,091h,091h,091h,091h,091h,049h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   91 91 91 49 FF
+	   FF FF FF FF FF
+	   FF
+ 00002429  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00002439  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00002449  FF FF FF 91 B6		BYTE 0ffh,0ffh,0ffh,091h,0b6h,0b6h,0b6h,091h,091h,091h,091h,091h,091h,091h,049h,049h
+	   B6 B6 91 91 91
+	   91 91 91 91 49
+	   49
+ 00002459  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00002469  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00002479  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,091h,091h,0b6h,0b6h
+	   FF FF FF FF FF
+	   FF FF 91 91 B6
+	   B6
+ 00002489  91 91 91 91 91		BYTE 091h,091h,091h,091h,091h,049h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   49 FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00002499  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000024A9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000024B9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,091h,091h,091h,091h,091h,049h,049h,0ffh,0ffh,0ffh
+	   FF 91 91 91 91
+	   91 49 49 FF FF
+	   FF
+ 000024C9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000024D9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000024E9  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 000024F9  49 49 49 FF FF		BYTE 049h,049h,049h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00002509  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF
+
+ 00002511 0000000F		nuke_001 EECS205BITMAP <15, 16, 255,, offset nuke_001 + sizeof nuke_001>
+	   00000010 FF
+	   00000003 [
+	    00
+	   ] 00002521 R
+ 00002521  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF FF FF FF FF
+	   FF FF FF FF FF
+	   FF
+ 00002531  FF FF FF FF 1C		BYTE 0ffh,0ffh,0ffh,0ffh,01ch,01ch,01ch,01ch,01ch,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	   1C 1C 1C 1C FF
+	   FF FF FF FF FF
+	   FF
+ 00002541  FF 1C 1C 1C 1C		BYTE 0ffh,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,0ffh,0ffh,0ffh,0ffh,0ffh,01ch
+	   1C 1C 1C 1C 1C
+	   FF FF FF FF FF
+	   1C
+ 00002551  1C 1C 1C 1C 1C		BYTE 01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,0ffh,0ffh,0ffh,01ch,01ch,01ch
+	   1C 1C 1C 1C 1C
+	   FF FF FF 1C 1C
+	   1C
+ 00002561  1C 1C 1C 1C 1C		BYTE 01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,0ffh,0ffh,01ch,01ch,01ch,01ch
+	   1C 1C 1C 1C 1C
+	   FF FF 1C 1C 1C
+	   1C
+ 00002571  1C FF FF FF 1C		BYTE 01ch,0ffh,0ffh,0ffh,01ch,01ch,01ch,01ch,01ch,0ffh,01ch,01ch,01ch,01ch,01ch,0ffh
+	   1C 1C 1C 1C FF
+	   1C 1C 1C 1C 1C
+	   FF
+ 00002581  FF FF FF FF 1C		BYTE 0ffh,0ffh,0ffh,0ffh,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,0ffh,0ffh,0ffh
+	   1C 1C 1C 1C 1C
+	   1C 1C 1C FF FF
+	   FF
+ 00002591  FF FF FF FF 1C		BYTE 0ffh,0ffh,0ffh,0ffh,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,0ffh,0ffh,0ffh,0ffh
+	   1C 1C 1C 1C 1C
+	   1C 1C FF FF FF
+	   FF
+ 000025A1  FF FF FF 1C 1C		BYTE 0ffh,0ffh,0ffh,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,0ffh,0ffh,0ffh,0ffh,0ffh
+	   1C 1C 1C 1C 1C
+	   1C FF FF FF FF
+	   FF
+ 000025B1  FF FF 1C 1C 1C		BYTE 0ffh,0ffh,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,0ffh,0ffh,0ffh,0ffh,0ffh
+	   1C 1C 1C 1C 1C
+	   1C FF FF FF FF
+	   FF
+ 000025C1  1C 1C 1C 1C 1C		BYTE 01ch,01ch,01ch,01ch,01ch,0ffh,01ch,01ch,01ch,01ch,01ch,0ffh,0ffh,0ffh,01ch,01ch
+	   FF 1C 1C 1C 1C
+	   1C FF FF FF 1C
+	   1C
+ 000025D1  1C 1C 1C FF FF		BYTE 01ch,01ch,01ch,0ffh,0ffh,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch
+	   1C 1C 1C 1C 1C
+	   1C 1C 1C 1C 1C
+	   1C
+ 000025E1  1C 1C FF FF FF		BYTE 01ch,01ch,0ffh,0ffh,0ffh,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch
+	   1C 1C 1C 1C 1C
+	   1C 1C 1C 1C 1C
+	   1C
+ 000025F1  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,01ch,0ffh,0ffh
+	   1C 1C 1C 1C 1C
+	   1C 1C 1C 1C FF
+	   FF
+ 00002601  FF FF FF FF FF		BYTE 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,01ch,01ch,01ch,01ch,01ch,0ffh,0ffh,0ffh,0ffh,0ffh
+	   FF 1C 1C 1C 1C
+	   1C FF FF FF FF
+	   FF
+
+
+
+
+					;;Helpful Structures
+ 00000008				POINT STRUCT
+ 00000000  00000000				 x    DWORD  ?
+ 00000004  00000000				 y    DWORD  ?
+					POINT ENDS
+
+
+ 00002611 00000140		Bullet SPRITE <320,420 ,0, offset nuke_001,3,1,1,10>
+	   000001A4
+	   00000000
+	   00002511 R
+	   00000003
+	   00000001
+	   00000001
+	   0000000A
+ 00002631 00000140		Player SPRITE <320,420, 1, offset fighter_000, 1,1, 1, 35>
+	   000001A4
+	   00000001
+	   000012FD R
+	   00000001
+	   00000001
+	   00000001
+	   00000023
+ 00002651 00000000		Explosion SPRITE <0,0,0,offset explosion, 4,1,0,84>
+	   00000000
+	   00000000
+	   000004DE R
+	   00000004
+	   00000001
+	   00000000
+	   00000054
+ 00002671 00000019		Asteroid10 SPRITE <25,50,1, offset Invader,2,1,1, 22>
+	   00000032
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002691 00000050		Asteroid1 SPRITE <80,50,1, offset Invader,2,1,1, 22>
+	   00000032
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 000026B1 00000087		Asteroid6 SPRITE <135,50,1, offset Invader,2,1,1, 22>
+	   00000032
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 000026D1 000000BE		Asteroid2 SPRITE <190,50,1, offset Invader,2,1,1, 22>
+	   00000032
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 000026F1 000000F5		Asteroid7 SPRITE <245,50,1, offset Invader,2,1,1, 22>
+	   00000032
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002711 0000012C		Asteroid3 SPRITE <300,50,1, offset Invader,2,1, 1, 22>
+	   00000032
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002731 00000163		Asteroid8 SPRITE <355,50,1, offset Invader,2,1, 1, 22>
+	   00000032
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002751 0000019A		Asteroid4 SPRITE <410,50,1, offset Invader,2,1,1, 22>
+	   00000032
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002771 000001D1		Asteroid9 SPRITE <465,50,1, offset Invader,2,1,1, 22>
+	   00000032
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002791 00000208		Asteroid5 SPRITE <520,50,1, offset Invader,2,1,1, 22>
+	   00000032
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 000027B1 0000023F		Asteroid11 SPRITE <575,50,1, offset Invader,2,1,1,22>
+	   00000032
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+
+ 000027D1 00000019		Asteroid12 SPRITE <25, 100 ,1, offset Invader,2,1,1,22>
+	   00000064
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 000027F1 00000050		Asteroid13 SPRITE <80, 100 ,1, offset Invader,2,1,1,22>
+	   00000064
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002811 00000087		Asteroid14 SPRITE <135, 100 ,1, offset Invader,2,1,1,22>
+	   00000064
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002831 000000BE		Asteroid15 SPRITE <190, 100 ,1, offset Invader,2,1,1,22>
+	   00000064
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002851 000000F5		Asteroid16 SPRITE <245, 100 ,1 , offset Invader,2,1,1,22>
+	   00000064
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002871 0000012C		Asteroid17 SPRITE <300, 100 ,1, offset Invader,2,1, 1,22>
+	   00000064
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002891 00000163		Asteroid18 SPRITE <355, 100 ,1, offset Invader,2,1, 1,22>
+	   00000064
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 000028B1 0000019A		Asteroid19 SPRITE <410, 100 ,1, offset Invader,2,1,1,22>
+	   00000064
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 000028D1 000001D1		Asteroid20 SPRITE <465, 100 ,1, offset Invader,2,1,1,22>
+	   00000064
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 000028F1 00000208		Asteroid21 SPRITE <520, 100 ,1, offset Invader,2,1,1,22>
+	   00000064
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002911 0000023F		Asteroid22 SPRITE <575, 100 ,1, offset Invader,2,1,1,22>
+	   00000064
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+
+
+ 00002931 00000019		Asteroid23 SPRITE <25, 150 ,1, offset Invader,2,1,1,22>
+	   00000096
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002951 00000050		Asteroid24 SPRITE <80, 150 ,1, offset Invader,2,1,1,22>
+	   00000096
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002971 00000087		Asteroid25 SPRITE <135, 150 ,1, offset Invader,2,1,1,22>
+	   00000096
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002991 000000BE		Asteroid26 SPRITE <190, 150 ,1, offset Invader,2,1,1,22>
+	   00000096
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 000029B1 000000F5		Asteroid27 SPRITE <245, 150 ,1 , offset Invader,2,1,1,22>
+	   00000096
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 000029D1 0000012C		Asteroid28 SPRITE <300, 150 ,1, offset Invader,2,1, 1,22>
+	   00000096
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 000029F1 00000163		Asteroid29 SPRITE <355, 150 ,1, offset Invader,2,1, 1,22>
+	   00000096
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002A11 0000019A		Asteroid30 SPRITE <410, 150 ,1, offset Invader,2,1,1,22>
+	   00000096
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002A31 000001D1		Asteroid31 SPRITE <465, 150 ,1, offset Invader,2,1,1,22>
+	   00000096
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002A51 00000208		Asteroid32 SPRITE <520, 150 ,1, offset Invader,2,1,1,22>
+	   00000096
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002A71 0000023F		Asteroid33 SPRITE <575, 150 ,1, offset Invader,2,1,1,22>
+	   00000096
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+
+ 00002A91 00000019		Asteroid34 SPRITE <25, 200 ,1, offset Invader,2,1,1,22>
+	   000000C8
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002AB1 00000050		Asteroid35 SPRITE <80, 200 ,1, offset Invader,2,1,1,22>
+	   000000C8
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002AD1 00000087		Asteroid36 SPRITE <135, 200 ,1, offset Invader,2,1,1,22>
+	   000000C8
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002AF1 000000BE		Asteroid37 SPRITE <190, 200 ,1, offset Invader,2,1,1,22>
+	   000000C8
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002B11 000000F5		Asteroid38 SPRITE <245, 200 ,1 , offset Invader,2,1,1,22>
+	   000000C8
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002B31 0000012C		Asteroid39 SPRITE <300, 200 ,1, offset Invader,2,1, 1,22>
+	   000000C8
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002B51 00000163		Asteroid40 SPRITE <355, 200 ,1, offset Invader,2,1, 1,22>
+	   000000C8
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002B71 0000019A		Asteroid41 SPRITE <410, 200 ,1, offset Invader,2,1,1,22>
+	   000000C8
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002B91 000001D1		Asteroid42 SPRITE <465, 200 ,1, offset Invader,2,1,1,22>
+	   000000C8
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002BB1 00000208		Asteroid43 SPRITE <520, 200 ,1, offset Invader,2,1,1,22>
+	   000000C8
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+ 00002BD1 0000023F		Asteroid44 SPRITE <575, 200 ,1, offset Invader,2,1,1,22>
+	   000000C8
+	   00000001
+	   00000000 R
+	   00000002
+	   00000001
+	   00000001
+	   00000016
+
+
+
+
+
+
+
+
+ 00002BF1 0000002F		NumSprites DWORD 47
+ 00002BF5 00002611 R		Sprites DWORD offset Bullet
+ 00002BF9 00002651 R		expl DWORD offset Explosion
+ 00000000			.CODE
+
+
+ 00000000			DrawAllSprites PROC ;;uses ebx 
+ 00000000  B8 00000000		mov eax, 0
+ 00000005  8B 1D 00002BF5 R	mov ebx, Sprites
+ 0000000B			DNS:
+ 0000000B  83 7B 08 01		cmp (SPRITE PTR [ebx]).Visible, 1
+ 0000000F  75 0D		jne nextSprite
+				INVOKE BasicBlit,(SPRITE PTR [ebx]).BitmapPTR, (SPRITE PTR [ebx]).LocX ,(SPRITE PTR [ebx]).LocY
+
+
+ 0000001E			nextSprite:
+ 0000001E  83 C3 20		add ebx, 32
+ 00000021  40			inc eax
+ 00000022  3B 05 00002BF1 R	cmp eax, NumSprites
+ 00000028  75 E1		jne DNS
+
+ 0000002A  C3			ret
+ 0000002B			DrawAllSprites ENDP
+
+				;; Define the function GameRender
+				;; Since we have thoroughly covered defining functions in class, its up to you from here on out...
+ 0000002B			GameRender PROC
+				INVOKE BeginDraw
+				INVOKE DrawAllStars
+				INVOKE DrawAllSprites
+				INVOKE EndDraw
+
+ 0000003F  C3			ret
+ 00000040			GameRender ENDP
+
+
+
+					
+				END
+Microsoft (R) Macro Assembler Version 6.14.8444		    03/27/15 10:23:45
+render.asm						     Symbols 2 - 1
+
+
+
+
+Structures and Unions:
+
+                N a m e                  Size
+                                         Offset      Type
+
+POINT  . . . . . . . . . . . . .	 00000008
+  x  . . . . . . . . . . . . . .	 00000000	 DWord
+  y  . . . . . . . . . . . . . .	 00000004	 DWord
+SPRITE . . . . . . . . . . . . .	 00000020
+  LocX . . . . . . . . . . . . .	 00000000	 DWord
+  LocY . . . . . . . . . . . . .	 00000004	 DWord
+  Visible  . . . . . . . . . . .	 00000008	 DWord
+  BitmapPTR  . . . . . . . . . .	 0000000C	 DWord
+  BMType . . . . . . . . . . . .	 00000010	 DWord
+  Health . . . . . . . . . . . .	 00000014	 DWord
+  Other  . . . . . . . . . . . .	 00000018	 DWord
+  Radius . . . . . . . . . . . .	 0000001C	 DWord
+_EECS205BITMAP . . . . . . . . .	 00000010
+  dwWidth  . . . . . . . . . . .	 00000000	 DWord
+  dwHeight . . . . . . . . . . .	 00000004	 DWord
+  bTransparent . . . . . . . . .	 00000008	 Byte
+  lpBytes  . . . . . . . . . . .	 0000000C	 DWord
+
+
+Types:
+
+                N a m e                  Size     Attr
+
+EECS205BITMAP  . . . . . . . . .	 00000010     _EECS205BITMAP 
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 00002BFD Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000040 Para	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+BasicBlit  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+BeginDraw  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+BlitReg  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Collision  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+DrawAllSprites . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000002B Public STDCALL
+  DNS  . . . . . . . . . . . . .	L Near	 0000000B _TEXT	
+  nextSprite . . . . . . . . . .	L Near	 0000001E _TEXT	
+DrawAllStars . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+DrawInt  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+DrawStarReg  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+DrawString . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+EndDraw  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GameInit . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GameLogic  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GameMain . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GameRender . . . . . . . . . . .	P Near	 0000002B _TEXT	Length= 00000015 Public STDCALL
+RotateBlit . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000003h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+Asteroid10 . . . . . . . . . . .	SPRITE	 00002671 _DATA	
+Asteroid11 . . . . . . . . . . .	SPRITE	 000027B1 _DATA	
+Asteroid12 . . . . . . . . . . .	SPRITE	 000027D1 _DATA	
+Asteroid13 . . . . . . . . . . .	SPRITE	 000027F1 _DATA	
+Asteroid14 . . . . . . . . . . .	SPRITE	 00002811 _DATA	
+Asteroid15 . . . . . . . . . . .	SPRITE	 00002831 _DATA	
+Asteroid16 . . . . . . . . . . .	SPRITE	 00002851 _DATA	
+Asteroid17 . . . . . . . . . . .	SPRITE	 00002871 _DATA	
+Asteroid18 . . . . . . . . . . .	SPRITE	 00002891 _DATA	
+Asteroid19 . . . . . . . . . . .	SPRITE	 000028B1 _DATA	
+Asteroid1  . . . . . . . . . . .	SPRITE	 00002691 _DATA	
+Asteroid20 . . . . . . . . . . .	SPRITE	 000028D1 _DATA	
+Asteroid21 . . . . . . . . . . .	SPRITE	 000028F1 _DATA	
+Asteroid22 . . . . . . . . . . .	SPRITE	 00002911 _DATA	
+Asteroid23 . . . . . . . . . . .	SPRITE	 00002931 _DATA	
+Asteroid24 . . . . . . . . . . .	SPRITE	 00002951 _DATA	
+Asteroid25 . . . . . . . . . . .	SPRITE	 00002971 _DATA	
+Asteroid26 . . . . . . . . . . .	SPRITE	 00002991 _DATA	
+Asteroid27 . . . . . . . . . . .	SPRITE	 000029B1 _DATA	
+Asteroid28 . . . . . . . . . . .	SPRITE	 000029D1 _DATA	
+Asteroid29 . . . . . . . . . . .	SPRITE	 000029F1 _DATA	
+Asteroid2  . . . . . . . . . . .	SPRITE	 000026D1 _DATA	
+Asteroid30 . . . . . . . . . . .	SPRITE	 00002A11 _DATA	
+Asteroid31 . . . . . . . . . . .	SPRITE	 00002A31 _DATA	
+Asteroid32 . . . . . . . . . . .	SPRITE	 00002A51 _DATA	
+Asteroid33 . . . . . . . . . . .	SPRITE	 00002A71 _DATA	
+Asteroid34 . . . . . . . . . . .	SPRITE	 00002A91 _DATA	
+Asteroid35 . . . . . . . . . . .	SPRITE	 00002AB1 _DATA	
+Asteroid36 . . . . . . . . . . .	SPRITE	 00002AD1 _DATA	
+Asteroid37 . . . . . . . . . . .	SPRITE	 00002AF1 _DATA	
+Asteroid38 . . . . . . . . . . .	SPRITE	 00002B11 _DATA	
+Asteroid39 . . . . . . . . . . .	SPRITE	 00002B31 _DATA	
+Asteroid3  . . . . . . . . . . .	SPRITE	 00002711 _DATA	
+Asteroid40 . . . . . . . . . . .	SPRITE	 00002B51 _DATA	
+Asteroid41 . . . . . . . . . . .	SPRITE	 00002B71 _DATA	
+Asteroid42 . . . . . . . . . . .	SPRITE	 00002B91 _DATA	
+Asteroid43 . . . . . . . . . . .	SPRITE	 00002BB1 _DATA	
+Asteroid44 . . . . . . . . . . .	SPRITE	 00002BD1 _DATA	
+Asteroid4  . . . . . . . . . . .	SPRITE	 00002751 _DATA	
+Asteroid5  . . . . . . . . . . .	SPRITE	 00002791 _DATA	
+Asteroid6  . . . . . . . . . . .	SPRITE	 000026B1 _DATA	
+Asteroid7  . . . . . . . . . . .	SPRITE	 000026F1 _DATA	
+Asteroid8  . . . . . . . . . . .	SPRITE	 00002731 _DATA	
+Asteroid9  . . . . . . . . . . .	SPRITE	 00002771 _DATA	
+Bullet . . . . . . . . . . . . .	SPRITE	 00002611 _DATA	
+Explosion  . . . . . . . . . . .	SPRITE	 00002651 _DATA	
+Invader  . . . . . . . . . . . .	_EECS205BITMAP  00000000 _DATA	
+NumSprites . . . . . . . . . . .	DWord	 00002BF1 _DATA	Public STDCALL
+Player . . . . . . . . . . . . .	SPRITE	 00002631 _DATA	
+Sprites  . . . . . . . . . . . .	DWord	 00002BF5 _DATA	Public STDCALL
+StarBitmap . . . . . . . . . . .	_EECS205BITMAP  00000000 FLAT	External STDCALL
+WinMain  . . . . . . . . . . . .	L Near	 00000000 FLAT	External STDCALL
+asteroid_000 . . . . . . . . . .	_EECS205BITMAP  00001969 _DATA	
+dwPitch  . . . . . . . . . . . .	DWord	 00000000 FLAT	External STDCALL
+explosion  . . . . . . . . . . .	_EECS205BITMAP  000004DE _DATA	
+expl . . . . . . . . . . . . . .	DWord	 00002BF9 _DATA	Public STDCALL
+fighter_000  . . . . . . . . . .	_EECS205BITMAP  000012FD _DATA	
+lpDisplayBits  . . . . . . . . .	DWord	 00000000 FLAT	External STDCALL
+nuke_001 . . . . . . . . . . . .	_EECS205BITMAP  00002511 _DATA	
+
+	   0 Warnings
+	   0 Errors
